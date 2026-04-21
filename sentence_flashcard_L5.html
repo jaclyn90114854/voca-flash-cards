@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>문장 해석 카드 — L5 Big Miracle</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #f4f3ef;
+    --surface: #ffffff;
+    --surface2: #eeede8;
+    --border: rgba(0,0,0,0.10);
+    --border2: rgba(0,0,0,0.20);
+    --text: #1a1a18;
+    --text2: #6b6b66;
+    --text3: #9b9b96;
+    --radius: 14px;
+    --radius-sm: 9px;
+    --green-bg: #e1f5ee;
+    --green-border: #1d9e75;
+    --green-text: #085041;
+    --red-bg: #fcebeb;
+    --red-border: #e24b4a;
+    --red-text: #501313;
+    --accent-bg: #e1f5ee;
+    --accent-text: #085041;
+    --dlg-bg: #eeedfe;
+    --dlg-text: #3c3489;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #1c1c1a;
+      --surface: #272724;
+      --surface2: #313130;
+      --border: rgba(255,255,255,0.08);
+      --border2: rgba(255,255,255,0.18);
+      --text: #f0efe9;
+      --text2: #9b9b96;
+      --text3: #6b6b66;
+      --green-bg: #0a2e22;
+      --green-border: #1d9e75;
+      --green-text: #9fe1cb;
+      --red-bg: #2e0f0f;
+      --red-border: #e24b4a;
+      --red-text: #f09595;
+      --accent-bg: #0a2e22;
+      --accent-text: #9fe1cb;
+      --dlg-bg: #26215c;
+      --dlg-text: #afa9ec;
+    }
+  }
+
+  html, body { min-height: 100%; background: var(--bg); color: var(--text); font-family: -apple-system, 'Noto Sans KR', BlinkMacSystemFont, 'Segoe UI', sans-serif; line-height: 1.6; }
+  body { display: flex; justify-content: center; padding: 2rem 1rem 4rem; }
+  .app { width: 100%; max-width: 640px; }
+
+  .app-header { display: flex; align-items: center; gap: 10px; margin-bottom: 2rem; }
+  .app-logo { width: 36px; height: 36px; background: var(--text); border-radius: 9px; display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0; }
+  .app-title { font-size: 17px; font-weight: 600; }
+  .app-sub { font-size: 12px; color: var(--text2); }
+
+  .screen { display: none; }
+  .screen.active { display: block; }
+
+  .back-btn { background: transparent; border: none; color: var(--text2); font-size: 13px; cursor: pointer; padding: 0 0 1.25rem; display: flex; align-items: center; gap: 5px; font-family: inherit; }
+  .back-btn:hover { color: var(--text); }
+
+  .prog-bar { height: 3px; background: var(--border); border-radius: 2px; margin-bottom: 1.75rem; overflow: hidden; }
+  .prog-fill { height: 100%; background: var(--text); border-radius: 2px; transition: width .35s ease; }
+
+  /* HOME */
+  .home-hero { margin-bottom: 1.5rem; }
+  .home-title { font-size: 26px; font-weight: 700; letter-spacing: -.5px; margin-bottom: .25rem; line-height: 1.25; }
+  .home-lesson { font-size: 13px; color: var(--text2); margin-bottom: .5rem; }
+  .home-passage { font-size: 12px; font-style: italic; color: var(--text3); background: var(--surface2); padding: 8px 12px; border-radius: var(--radius-sm); border-left: 3px solid var(--border2); margin-bottom: .75rem; line-height: 1.6; }
+  .tag-row { display: flex; gap: 6px; flex-wrap: wrap; }
+  .tag { font-size: 12px; padding: 3px 10px; border-radius: 20px; border: 0.5px solid var(--border2); color: var(--text2); }
+  .tag.dlg { background: var(--dlg-bg); color: var(--dlg-text); border-color: transparent; }
+
+  .home-btns { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 1.25rem 0; }
+  .mode-card { padding: 1.25rem; border: 0.5px solid var(--border2); border-radius: var(--radius); background: var(--surface); cursor: pointer; text-align: left; font-family: inherit; color: var(--text); transition: background .15s; }
+  .mode-card:hover { background: var(--surface2); }
+  .mode-icon { font-size: 22px; margin-bottom: .6rem; display: block; }
+  .mode-name { font-size: 15px; font-weight: 600; margin-bottom: .2rem; }
+  .mode-hint { font-size: 12px; color: var(--text2); line-height: 1.5; }
+
+  .filter-section { margin-bottom: .25rem; }
+  .filter-label { font-size: 12px; color: var(--text2); margin-bottom: .4rem; }
+  .filter-row { display: flex; gap: 6px; flex-wrap: wrap; }
+  .filter-btn { font-size: 12px; padding: 4px 12px; border: 0.5px solid var(--border2); border-radius: 20px; background: transparent; color: var(--text2); cursor: pointer; font-family: inherit; transition: background .12s; }
+  .filter-btn.on { background: var(--text); color: var(--bg); border-color: var(--text); }
+  .filter-btn:hover:not(.on) { background: var(--surface2); }
+
+  /* STUDY */
+  .card-meta { display: flex; align-items: center; gap: 8px; margin-bottom: .75rem; }
+  .card-page { font-size: 11px; padding: 2px 9px; border-radius: 20px; font-weight: 500; }
+  .card-page.narr { background: var(--accent-bg); color: var(--accent-text); }
+  .card-page.dlg  { background: var(--dlg-bg);    color: var(--dlg-text); }
+  .card-num { font-size: 12px; color: var(--text3); }
+
+  .card-scene { perspective: 1000px; cursor: pointer; margin-bottom: 1.5rem; user-select: none; }
+  .card-inner { position: relative; height: 230px; transform-style: preserve-3d; transition: transform .45s cubic-bezier(.4,0,.2,1); }
+  .card-inner.flipped { transform: rotateY(180deg); }
+  .card-face { position: absolute; inset: 0; backface-visibility: hidden; -webkit-backface-visibility: hidden; border: 0.5px solid var(--border); border-radius: var(--radius); background: var(--surface); display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 1.75rem 1.75rem 3rem; text-align: center; overflow: hidden; }
+  .card-face.back { transform: rotateY(180deg); }
+  .card-en { font-size: 16px; font-weight: 500; line-height: 1.75; }
+  .card-ko { font-size: 16px; font-weight: 500; line-height: 1.75; word-break: keep-all; }
+  .card-speaker { font-size: 11px; color: var(--dlg-text); background: var(--dlg-bg); padding: 2px 8px; border-radius: 20px; margin-bottom: .6rem; align-self: center; }
+  .card-hint { position: absolute; bottom: 1rem; font-size: 11px; color: var(--text3); display: flex; align-items: center; gap: 4px; }
+  .card-hint::before { content: ''; display: inline-block; width: 10px; height: 10px; border-radius: 50%; border: 1.5px solid var(--text3); }
+
+  .nav-row { display: flex; align-items: center; gap: 10px; margin-bottom: 1rem; }
+  .nav-btn { padding: 9px 20px; border: 0.5px solid var(--border2); border-radius: var(--radius-sm); background: transparent; color: var(--text); cursor: pointer; font-size: 14px; font-family: inherit; transition: background .12s; }
+  .nav-btn:disabled { opacity: .3; cursor: default; }
+  .nav-btn:not(:disabled):hover { background: var(--surface2); }
+  .counter { flex: 1; text-align: center; font-size: 14px; color: var(--text2); }
+
+  .tool-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+  .tool-btn { padding: 9px 8px; border: 0.5px solid var(--border); border-radius: var(--radius-sm); background: transparent; color: var(--text2); cursor: pointer; font-size: 13px; font-family: inherit; text-align: center; transition: background .12s; }
+  .tool-btn:hover { background: var(--surface2); color: var(--text); }
+  .tool-btn.accent { border-color: var(--border2); color: var(--text); font-weight: 500; }
+
+  .toggle-row { display: flex; align-items: center; gap: 8px; margin-top: 1rem; }
+  .toggle-label { font-size: 13px; color: var(--text2); }
+  .toggle-btn { padding: 5px 14px; border: 0.5px solid var(--border2); border-radius: 20px; background: transparent; color: var(--text2); cursor: pointer; font-size: 12px; font-family: inherit; }
+  .toggle-btn.on { background: var(--dlg-bg); color: var(--dlg-text); border-color: transparent; }
+
+  .key-hint { margin-top: 1rem; text-align: center; font-size: 12px; color: var(--text3); }
+  kbd { display: inline-block; padding: 1px 6px; border: 0.5px solid var(--border2); border-radius: 4px; font-size: 11px; font-family: monospace; color: var(--text2); background: var(--surface2); }
+
+  /* QUIZ */
+  .quiz-mode-tabs { display: flex; gap: 6px; margin-bottom: 1rem; background: var(--surface2); padding: 4px; border-radius: var(--radius-sm); }
+  .quiz-tab { flex: 1; padding: 8px; border: none; border-radius: 7px; background: transparent; color: var(--text2); cursor: pointer; font-size: 12px; font-family: inherit; transition: background .15s, color .15s; }
+  .quiz-tab.on { background: var(--surface); color: var(--text); font-weight: 600; box-shadow: 0 1px 4px rgba(0,0,0,0.08); }
+
+  .quiz-q-label { font-size: 12px; color: var(--text2); margin-bottom: .5rem; }
+  .quiz-q { min-height: 130px; padding: 1.5rem; border: 0.5px solid var(--border); border-radius: var(--radius); background: var(--surface); font-size: 15px; font-weight: 500; text-align: center; display: flex; align-items: center; justify-content: center; margin-bottom: 1.25rem; line-height: 1.75; word-break: keep-all; }
+  .quiz-opts { display: grid; grid-template-columns: 1fr; gap: 9px; margin-bottom: 1rem; }
+  .opt { padding: 13px 16px; border: 0.5px solid var(--border2); border-radius: var(--radius-sm); background: var(--surface); color: var(--text); cursor: pointer; font-size: 14px; font-family: inherit; text-align: left; line-height: 1.65; transition: background .12s; word-break: keep-all; }
+  .opt:hover:not(:disabled) { background: var(--surface2); }
+  .opt.correct { border-color: var(--green-border) !important; background: var(--green-bg) !important; color: var(--green-text) !important; font-weight: 600; }
+  .opt.wrong   { border-color: var(--red-border)   !important; background: var(--red-bg)   !important; color: var(--red-text)   !important; }
+  .opt:disabled { cursor: default; }
+  .quiz-counter { text-align: center; font-size: 13px; color: var(--text2); }
+
+  /* RESULTS */
+  .result-wrap { text-align: center; padding: 2rem 0 1rem; }
+  .result-ring { width: 120px; height: 120px; border-radius: 50%; border: 4px solid var(--border); display: flex; flex-direction: column; align-items: center; justify-content: center; margin: 0 auto 1.5rem; }
+  .result-score { font-size: 36px; font-weight: 700; }
+  .result-total { font-size: 13px; color: var(--text2); }
+  .result-pct { font-size: 17px; font-weight: 600; margin-bottom: .4rem; }
+  .result-msg { color: var(--text2); font-size: 14px; margin-bottom: 2rem; word-break: keep-all; }
+  .result-btns { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .res-btn { padding: 14px; border: 0.5px solid var(--border2); border-radius: var(--radius); background: var(--surface); color: var(--text); cursor: pointer; font-size: 14px; font-weight: 500; font-family: inherit; transition: background .12s; }
+  .res-btn:hover { background: var(--surface2); }
+  .res-btn.primary { background: var(--text); color: var(--bg); border-color: var(--text); }
+  .res-btn.primary:hover { opacity: .85; }
+
+  .footer { margin-top: 3rem; text-align: center; font-size: 12px; color: var(--text3); }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <div class="app-header">
+    <div class="app-logo">🐋</div>
+    <div>
+      <div class="app-title">문장 해석 카드</div>
+      <div class="app-sub">L5 Big Miracle · 영어 독해와 작문</div>
+    </div>
+  </div>
+
+  <!-- HOME -->
+  <div class="screen active" id="s-home">
+    <div class="home-hero">
+      <div class="home-title">Big Miracle</div>
+      <div class="home-lesson">Lesson 5 Reading — pp. 104–108</div>
+      <div class="home-passage">"Big Miracle" is a true story of the rescue of three whales trapped within a wall of ice off the coast of Barrow, Alaska.</div>
+      <div class="tag-row">
+        <span class="tag">43개 카드</span>
+        <span class="tag">서술문 포함</span>
+        <span class="tag dlg">대화문 포함</span>
+        <span class="tag">페이지별 필터</span>
+      </div>
+    </div>
+
+    <div class="home-btns">
+      <button class="mode-card" onclick="goStudy()">
+        <span class="mode-icon">📖</span>
+        <div class="mode-name">카드 학습</div>
+        <div class="mode-hint">영어 문장을 보고 클릭하여 해석을 확인하세요</div>
+      </button>
+      <button class="mode-card" onclick="goQuiz()">
+        <span class="mode-icon">✏️</span>
+        <div class="mode-name">퀴즈 테스트</div>
+        <div class="mode-hint">문장에 맞는 해석을 4개 중 골라보세요</div>
+      </button>
+    </div>
+
+    <div class="filter-section">
+      <div class="filter-label">범위 선택</div>
+      <div class="filter-row">
+        <button class="filter-btn on" id="hf-all"  onclick="setFilter('all')">전체</button>
+        <button class="filter-btn"    id="hf-104"  onclick="setFilter('104')">p.104</button>
+        <button class="filter-btn"    id="hf-105"  onclick="setFilter('105')">p.105</button>
+        <button class="filter-btn"    id="hf-106"  onclick="setFilter('106')">p.106</button>
+        <button class="filter-btn"    id="hf-107"  onclick="setFilter('107')">p.107</button>
+        <button class="filter-btn"    id="hf-108"  onclick="setFilter('108')">p.108</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- STUDY -->
+  <div class="screen" id="s-study">
+    <button class="back-btn" onclick="goHome()">← 홈으로</button>
+    <div class="prog-bar"><div class="prog-fill" id="sp"></div></div>
+    <div class="card-meta">
+      <span class="card-page" id="cpg"></span>
+      <span class="card-num"  id="cnum"></span>
+    </div>
+    <div class="card-scene" onclick="flip()">
+      <div class="card-inner" id="ci">
+        <div class="card-face front">
+          <div class="card-speaker" id="cspk-f" style="display:none"></div>
+          <div class="card-en" id="cen"></div>
+          <div class="card-hint">클릭하여 해석 보기</div>
+        </div>
+        <div class="card-face back">
+          <div class="card-speaker" id="cspk-b" style="display:none"></div>
+          <div class="card-ko" id="cko"></div>
+          <div class="card-hint">클릭하여 문장 보기</div>
+        </div>
+      </div>
+    </div>
+    <div class="nav-row">
+      <button class="nav-btn" id="bp" onclick="prev()">← 이전</button>
+      <div class="counter" id="sc"></div>
+      <button class="nav-btn" id="bn" onclick="next()">다음 →</button>
+    </div>
+    <div class="tool-row">
+      <button class="tool-btn" onclick="shuffleDeck()">🔀 섞기</button>
+      <button class="tool-btn" onclick="resetDeck()">↩ 처음부터</button>
+      <button class="tool-btn accent" onclick="goQuiz()">퀴즈 시작 →</button>
+    </div>
+    <div class="toggle-row">
+      <span class="toggle-label">대화문 포함:</span>
+      <button class="toggle-btn on" id="dlg-toggle" onclick="toggleDlg()">포함</button>
+    </div>
+    <div class="key-hint"><kbd>←</kbd> <kbd>→</kbd> 이동 &nbsp;·&nbsp; <kbd>Space</kbd> 뒤집기</div>
+  </div>
+
+  <!-- QUIZ -->
+  <div class="screen" id="s-quiz">
+    <button class="back-btn" onclick="goHome()">← 홈으로</button>
+    <div class="prog-bar"><div class="prog-fill" id="qp"></div></div>
+    <div class="quiz-mode-tabs">
+      <button class="quiz-tab on" id="qtab-en" onclick="setQMode('en')">영어 → 한국어</button>
+      <button class="quiz-tab"    id="qtab-ko" onclick="setQMode('ko')">한국어 → 영어</button>
+    </div>
+    <div class="quiz-q-label" id="qlabel"></div>
+    <div class="quiz-q" id="qq"></div>
+    <div class="quiz-opts" id="qo"></div>
+    <div class="quiz-counter" id="qc"></div>
+  </div>
+
+  <!-- RESULTS -->
+  <div class="screen" id="s-results">
+    <div class="result-wrap">
+      <div class="result-ring">
+        <div class="result-score" id="rscore"></div>
+        <div class="result-total" id="rtotal"></div>
+      </div>
+      <div class="result-pct" id="rpct"></div>
+      <div class="result-msg" id="rmsg"></div>
+      <div class="result-btns">
+        <button class="res-btn" onclick="goStudy()">카드 복습</button>
+        <button class="res-btn primary" onclick="goQuiz()">다시 테스트</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer">영어 독해와 작문 · Lesson 5 문장 해석 카드</div>
+</div>
+
+<script>
+// type: 'n'=narration, 'd'=dialogue
+const ALL = [
+  // p.104 - narration
+  {p:"104", type:"n", spk:"", en:'"Big Miracle" is a true story of the rescue of three whales trapped within a wall of ice off the coast of Barrow, Alaska.', ko:'"Big Miracle"은 Alaska의 Barrow 연안에서 빙벽 안에 갇힌 세 고래의 구조에 관한 실화이다.'},
+  {p:"104", type:"n", spk:"", en:"The various groups of people involved in the rescue had different intentions at first, but later they all cooperated to save the whales.", ko:"구조에 참여한 다양한 무리의 사람들은 처음에는 다른 의도를 가지고 있었지만, 나중에는 고래들을 구하기 위해 모두 협력했다."},
+  {p:"104", type:"n", spk:"", en:'The result was a "big miracle."', ko:'그 결과는 "대단한 기적"이었다.'},
+  {p:"104", type:"n", spk:"", en:"In 1988, three gray whales got stuck in the ice.", ko:"1988년 세 귀신고래가 얼음에 갇혔다."},
+  {p:"104", type:"n", spk:"", en:"They were in danger because the ice wall around the whales was freezing rapidly and getting thicker.", ko:"고래들 주변의 빙벽이 급속히 얼어붙고 있었고, 점점 더 두꺼워지고 있었기 때문에 그들은 위기에 처했다."},
+  {p:"104", type:"n", spk:"", en:"Adam Carlson, a local reporter, discovered them and reported it on the news.", ko:"지역 보도 기자인 Adam Carlson은 그들을 발견하고 뉴스에 보도했다."},
+  // p.104 - dialogue Adam
+  {p:"104", type:"d", spk:"Adam", en:"Adam Carlson here. I'm standing out on this frozen landscape in Barrow, Alaska where we've recently discovered a tragedy in the making. A family of three gray whales is trapped in the ice, and experts give the whales a slim chance of survival. A rescue mission is being discussed but has not yet begun. This is Adam Carlson, reporting from Barrow, Alaska.", ko:"Adam Carlson입니다. 저는 최근 비극이 진행되고 있는 것으로 알려진 Alaska Barrow의 얼어붙은 풍경에 서 있습니다. 세 마리의 귀신고래 가족이 얼음에 갇혔고, 전문가들은 이 고래들의 생존 가능성이 희박하다고 말합니다. 구출 작전이 논의되고 있지만 아직 시작되지 않았습니다. Alaska의 Barrow에서 Adam Carlson이 전해드렸습니다."},
+  // p.105 - narration
+  {p:"105", type:"n", spk:"", en:"Surrounded by ice, the mom, dad, and baby whale were having a hard time.", ko:"엄마, 아빠, 그리고 새끼 고래는 얼음에 둘러싸여서 어려움을 겪고 있었다."},
+  {p:"105", type:"n", spk:"", en:"They had to surface to breathe, but each time they surfaced, they cut themselves on the sharp edges of the ice.", ko:"그들은 숨을 쉬기 위해 수면으로 올라와야 했는데, 그때마다 얼음의 날카로운 모서리에 몸을 베였다."},
+  {p:"105", type:"n", spk:"", en:"As the story became international news, many groups responded to play a part in saving the whales, although they all had different reasons for being there.", ko:"이 이야기가 국제적인 뉴스가 되자, 많은 무리의 사람들이 그곳에 모두 서로 다른 이유로 왔음에도 불구하고 고래를 구하는 데 일조하겠다고 응답했다."},
+  {p:"105", type:"n", spk:"", en:"Ambitious news reporters used the story to further their careers.", ko:"야심에 찬 뉴스 보도 기자들은 그들의 경력을 발전시키기 위해 이 이야기를 이용했다."},
+  {p:"105", type:"n", spk:"", en:"An oil company offered a barge to break the ice as a way to gain favor with the public.", ko:"한 정유 회사는 대중들의 환심을 사기 위해 얼음을 깰 바지선을 제공했다."},
+  {p:"105", type:"n", spk:"", en:"The U.S. government supported the rescue effort to earn voters' support in the coming election.", ko:"미국 정부는 다가오는 선거에서 유권자들의 지지를 얻기 위해 구조 활동을 지원했다."},
+  {p:"105", type:"n", spk:"", en:"In contrast, the Inupiat wanted to hunt the whales, as they had done for centuries.", ko:"반면에, Inupiat족은 그들이 수 세기 동안 그래 왔던 것처럼, 고래를 사냥하길 원했다."},
+  {p:"105", type:"n", spk:"", en:"That put them in direct conflict with a Greenpeace activist named Rachel.", ko:"이로 인해 이들은 Rachel이라는 Greenpeace 활동가와 직접적인 갈등을 겪게 되었다."},
+  // p.105 - dialogue
+  {p:"105", type:"d", spk:"Rachel", en:"Why won't you give us a chance to get them out? I have a barge that's just days away, but you want to kill them. How could you?", ko:"왜 당신들은 제게 고래들을 구할 기회를 주지 않는 겁니까? 며칠만 있으면 바지선이 올 텐데, 당신들은 고래들을 죽이려고 하는군요. 어떻게 그럴 수가 있어요?"},
+  {p:"105", type:"d", spk:"Roy (Inupiat)", en:"Rachel, we have to hunt! One day, the oil is going to run out, and the money will stop coming. If we don't teach our children how to feed themselves, they're going to starve. And who's going to feed them then? Are you?", ko:"Rachel, 우리는 사냥을 해야 해요! 언젠가 석유는 바닥이 날 거고, 우리는 돈을 받지 못하게 돼요. 만약 우리가 우리 아이들에게 스스로 먹고 사는 방법을 가르쳐 주지 않는다면 그들은 굶어 죽고 말 거예요. 그땐 누가 그들을 먹여 살리겠소? 당신이 그렇게 할 겁니까?"},
+  // p.106 - narration
+  {p:"106", type:"n", spk:"", en:"As reporters flooded into Barrow from all over the world, Malik, the leader of the Inupiat tribe, realized that they would face enormous criticism if they killed the whales as the world watched.", ko:"전 세계에서 기자들이 Barrow로 몰려들면서, Inupiat족장인 Malik은 세계가 지켜보고 있기 때문에 만약 그들이 고래들을 죽인다면 그들은 엄청난 비난에 직면할 것이라는 것을 깨달았다."},
+  {p:"106", type:"n", spk:"", en:"That would not be good for the reputation of the tribe.", ko:"이는 부족의 명성에도 좋지 않았을 것이다."},
+  {p:"106", type:"n", spk:"", en:"The native people finally changed their mind and decided to help free the whales.", ko:"원주민들은 마침내 마음을 바꾸고 고래들을 구출하는 것을 돕기로 결심했다."},
+  {p:"106", type:"n", spk:"", en:"In the end, they played an important role in the rescue because they knew how to survive in the harsh climate.", ko:"결국 그들은 구조 작업에서 중요한 역할을 하게 되었는데, 그들은 혹독한 기후에서 살아남는 방법을 알고 있었기 때문이다."},
+  {p:"106", type:"n", spk:"", en:"With this cast of characters, the rescue mission did not go smoothly at first.", ko:"이러한 주역들이 있었지만, 처음에는 구조 작업이 순탄하게 이루어지지 않았다."},
+  {p:"106", type:"n", spk:"", en:"Temperatures were below freezing, and the hole in the ice that the whales breathed through was about to freeze over.", ko:"기온이 영하로 내려가고, 고래들이 숨을 쉬던 얼음의 구멍이 얼어붙기 시작했다."},
+  {p:"106", type:"n", spk:"", en:"Malik came up with a plan to cut open the ice and make small pools that the whales could access so that they could breathe until they could be led out into the open sea.", ko:"Malik은 고래들이 외해로 다다를 때까지 숨을 쉴 수 있도록 얼음을 잘라서 고래들이 접근할 수 있는 작은 웅덩이들을 만들자는 계획을 내놓았다."},
+  {p:"106", type:"n", spk:"", en:"Although it was a process that would take a long time, he persuaded the members of his tribe to help the whales with him.", ko:"그것은 비록 오랜 시간이 걸리는 과정이긴 했으나, 그는 그와 함께 고래들을 돕자고 부족원들을 설득했다."},
+  {p:"106", type:"n", spk:"", en:"They worked day and night to dig the holes.", ko:"그들은 구멍들을 파기 위해 밤낮으로 일했다."},
+  // p.106 - dialogue
+  {p:"106", type:"d", spk:"Malik", en:"The whales cannot survive here. We need to make a path out to open water. Let's start cutting holes every 20 meters.", ko:"고래들은 여기에서 살아남을 수 없단다. 우리는 외해로 나가는 길을 만들어야 해. 20미터마다 구멍을 만들기 시작하자."},
+  {p:"106", type:"d", spk:"Nathan", en:"But what makes you think they're going to follow our path, grandpa?", ko:"그렇지만 어떻게 고래들이 우리의 길을 따라 올 거라고 생각하시는 거예요, 할아버지?"},
+  {p:"106", type:"d", spk:"Malik", en:"We have no choice but to try.", ko:"우리는 시도해 보는 것 말고는 별다른 방법이 없단다."},
+  // p.107 - narration
+  {p:"107", type:"n", spk:"", en:"Bad news came. The barge which had been the only hope to break the sheet of ice so the whales could swim out to the open sea ended up getting stuck in the ice itself.", ko:"나쁜 소식이 전해졌다. 고래들이 외해로 헤엄쳐 나갈 수 있도록 얼음판을 깰 유일한 희망이었던 바지선이 결국 얼음에 갇혀 버렸다."},
+  {p:"107", type:"n", spk:"", en:"They needed a bigger ice breaker.", ko:"사람들은 더 큰 쇄빙선이 필요했다."},
+  {p:"107", type:"n", spk:"", en:"This was during the period of the East-West Cold War following World War II.", ko:"이때는 2차 세계대전 이후 동서 간의 냉전 시대였다."},
+  {p:"107", type:"n", spk:"", en:"Despite the unfriendly relations between the U.S. government and the Soviet Union, the U.S. government decided to call the Soviet Union for help.", ko:"미국 정부와 소련 간의 적대적인 관계에도 불구하고, 미국 정부는 소련에 도움을 요청하기로 결정했다."},
+  {p:"107", type:"n", spk:"", en:"Unexpectedly, the Soviet Navy responded positively to the request by sending a ship to help break a path for the whales.", ko:"뜻밖에도 소련의 해군은 고래들의 길을 터 줄 수 있는 배를 보냄으로써 요청에 긍정적으로 반응했다."},
+  {p:"107", type:"n", spk:"", en:"In the meantime, however, the baby whale died from its injuries.", ko:"그러나 그러는 동안 새끼 고래는 부상으로 인해 죽고 말았다."},
+  {p:"107", type:"n", spk:"", en:"In deep sadness, the people all continued to work to save the two remaining whales.", ko:"깊은 슬픔 속에서 사람들은 모두 남은 두 고래를 살리기 위해 계속 작업했다."},
+  // p.107 - dialogue
+  {p:"107", type:"d", spk:"Reporter", en:"The clock continues to tick down as crews work furiously to cut a path to the open ocean. The town of Barrow has shut down as school children and shop owners alike answer the call to help out on the ice in any way they can. Those who are not cutting holes are providing hot food and coffee to the workers.", ko:"작업자들이 외해로 나가는 길을 트기 위해 분투하고 있는 동안 시간은 계속 흘러가고 있습니다. 학생들도 상점주들도 할 수 있는 어떤 방법으로든 얼음판 위에서 도와달라는 요청에 응답하면서 Barrow 마을은 텅 비게 되었습니다. 구멍을 만들지 않는 사람들은 작업자들에게 따뜻한 음식과 커피를 제공하고 있습니다."},
+  // p.108 - narration
+  {p:"108", type:"n", spk:"", en:"At last, a miracle happened. The whales moved to within a kilometer of a point where the Soviet ice breaker could reach.", ko:"마침내, 기적이 일어났다. 고래들은 소련의 쇄빙선이 닿을 수 있는 지점의 1킬로미터 안까지 움직였다."},
+  // p.108 - dialogue
+  {p:"108", type:"d", spk:"Inupiat 부족원", en:"This is hole 425! That's more than 30 holes an hour, in a single day. It's incredible.", ko:"이게 425번 구멍입니다! 하루 종일, 한 시간에 30개 넘는 구멍들을 만들었어요. 믿을 수 없군요."},
+  {p:"108", type:"d", spk:"Rachel", en:"We really did it!", ko:"우리가 정말 해냈어요!"},
+  // p.108 - narration
+  {p:"108", type:"n", spk:"", en:"The enormous ice breaker arrived to remove the last barrier between the whales and the open sea.", ko:"거대한 쇄빙선이 고래들과 외해 사이의 마지막 장벽을 제거하기 위해 도착했다."},
+  {p:"108", type:"n", spk:"", en:"Actually, the ship's first attempt did not work and left only a small path in the ice.", ko:"사실 그 배의 첫 시도는 잘 되지 않았고, 얼음에 좁은 길만 남겼다."},
+  {p:"108", type:"n", spk:"", en:"On their second attempt, however, the ice was finally broken into a wide enough path and the whales escaped.", ko:"하지만 두 번째 시도에서 얼음은 마침내 충분히 넓은 통로가 생길 정도로 쪼개졌고, 고래들은 빠져나왔다."},
+  {p:"108", type:"n", spk:"", en:"The whales survived, and the world celebrated the miracle.", ko:"고래들은 살아남았고, 전 세계가 이 기적을 축하했다."},
+  {p:"108", type:"n", spk:"", en:"Without everybody's effort, it would not have happened.", ko:"모든 사람들의 노력이 없었다면, 이 일은 일어날 수 없었을 것이다."},
+  {p:"108", type:"n", spk:"", en:'Swimming away, the whales jumped high as if they were saying, "Thank you," to all the people who put their differences aside and joined forces to save them.', ko:'고래들은 헤엄쳐 가면서 의견 차이를 제쳐두고 고래들을 구하기 위해 힘을 모았던 사람들 모두에게 마치 "고맙다"고 말하듯 높이 뛰어올랐다.'}
+];
+
+let activeFilter = 'all';
+let includeDlg = true;
+let deck = [], si = 0, flipped = false;
+let qDeck = [], qi = 0, qs = 0, qa = false, qMode = 'en';
+
+function sh(arr) {
+  const a=[...arr];
+  for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}
+  return a;
+}
+
+function getPool() {
+  let r = [...ALL];
+  if (activeFilter !== 'all') r = r.filter(v => v.p === activeFilter);
+  if (!includeDlg) r = r.filter(v => v.type === 'n');
+  return r;
+}
+
+function show(id) {
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById('s-'+id).classList.add('active');
+  window.scrollTo(0,0);
+}
+
+function setFilter(f) {
+  activeFilter = f;
+  document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('on'));
+  document.getElementById('hf-'+f).classList.add('on');
+}
+
+function toggleDlg() {
+  includeDlg = !includeDlg;
+  const btn = document.getElementById('dlg-toggle');
+  btn.textContent = includeDlg ? '포함' : '제외';
+  btn.classList.toggle('on', includeDlg);
+  deck = getPool(); si = 0; renderCard();
+}
+
+function goHome() { show('home'); }
+
+function goStudy() {
+  deck = getPool(); si = 0; flipped = false;
+  renderCard();
+  show('study');
+}
+
+function renderCard() {
+  if (!deck.length) return;
+  const v = deck[si];
+  const isDlg = v.type === 'd';
+
+  document.getElementById('cen').textContent = v.en;
+  document.getElementById('cko').textContent = v.ko;
+
+  const pgEl = document.getElementById('cpg');
+  pgEl.textContent = 'p.' + v.p;
+  pgEl.className = 'card-page ' + (isDlg ? 'dlg' : 'narr');
+
+  ['cspk-f','cspk-b'].forEach(id=>{
+    const el=document.getElementById(id);
+    if(isDlg && v.spk){el.textContent=v.spk; el.style.display='';}
+    else{el.style.display='none';}
+  });
+
+  document.getElementById('ci').classList.remove('flipped');
+  flipped = false;
+  const n = deck.length;
+  document.getElementById('cnum').textContent = '문장 '+(si+1)+' / '+n;
+  document.getElementById('sc').textContent   = (si+1)+' / '+n;
+  document.getElementById('sp').style.width   = ((si+1)/n*100)+'%';
+  document.getElementById('bp').disabled = si===0;
+  document.getElementById('bn').disabled = si===n-1;
+}
+
+function flip() { flipped=!flipped; document.getElementById('ci').classList.toggle('flipped',flipped); }
+function prev() { if(si>0){si--;renderCard();} }
+function next() { if(si<deck.length-1){si++;renderCard();} }
+function shuffleDeck() { deck=sh(deck); si=0; renderCard(); }
+function resetDeck()   { deck=getPool(); si=0; renderCard(); }
+
+function setQMode(m) {
+  qMode=m;
+  document.getElementById('qtab-en').classList.toggle('on',m==='en');
+  document.getElementById('qtab-ko').classList.toggle('on',m==='ko');
+  qi=0;qs=0;qa=false;qDeck=sh(getPool());renderQ();
+}
+
+function goQuiz() {
+  qDeck=sh(getPool());qi=0;qs=0;qa=false;renderQ();show('quiz');
+}
+
+function renderQ() {
+  if(qi>=qDeck.length){showResults();return;}
+  qa=false;
+  const v=qDeck[qi];
+  const isEn=qMode==='en';
+  document.getElementById('qlabel').textContent=isEn?'이 문장의 올바른 해석은?':'이 해석에 해당하는 영어 문장은?';
+  document.getElementById('qq').textContent=isEn?v.en:v.ko;
+  document.getElementById('qc').textContent=(qi+1)+' / '+qDeck.length;
+  document.getElementById('qp').style.width=(qi/qDeck.length*100)+'%';
+
+  const pool=getPool().filter(x=>isEn?x.ko!==v.ko:x.en!==v.en);
+  const wrong=sh(pool).slice(0,3);
+  const opts=sh([v,...wrong]);
+  const container=document.getElementById('qo');
+  container.innerHTML='';
+  opts.forEach(o=>{
+    const btn=document.createElement('button');
+    btn.className='opt';
+    btn.textContent=isEn?o.ko:o.en;
+    const correct=isEn?o.ko===v.ko:o.en===v.en;
+    const correctVal=isEn?v.ko:v.en;
+    btn.onclick=()=>answer(btn,correct,correctVal);
+    container.appendChild(btn);
+  });
+}
+
+function answer(btn,correct,correctVal){
+  if(qa)return;qa=true;
+  if(correct){btn.classList.add('correct');qs++;}
+  else{
+    btn.classList.add('wrong');
+    document.querySelectorAll('.opt').forEach(b=>{if(b.textContent===correctVal)b.classList.add('correct');});
+  }
+  document.querySelectorAll('.opt').forEach(b=>b.disabled=true);
+  setTimeout(()=>{qi++;renderQ();},1400);
+}
+
+function showResults(){
+  const total=qDeck.length;
+  const pct=Math.round(qs/total*100);
+  document.getElementById('rscore').textContent=qs;
+  document.getElementById('rtotal').textContent='/ '+total;
+  document.getElementById('rpct').textContent='정답률 '+pct+'%';
+  let msg;
+  if(pct>=90)msg='완벽해요! 🎉 본문을 정확하게 이해하고 있어요.';
+  else if(pct>=70)msg='잘했어요! 💪 조금 더 연습하면 완벽해요.';
+  else if(pct>=50)msg='절반 이상 맞았어요. 틀린 문장을 복습해 보세요.';
+  else msg='카드 학습으로 더 연습한 뒤 다시 도전해 보세요!';
+  document.getElementById('rmsg').textContent=msg;
+  show('results');
+}
+
+document.addEventListener('keydown',e=>{
+  if(!document.getElementById('s-study').classList.contains('active'))return;
+  if(e.key===' '||e.key==='Enter'){e.preventDefault();flip();}
+  if(e.key==='ArrowLeft')prev();
+  if(e.key==='ArrowRight')next();
+});
+</script>
+</body>
+</html>
