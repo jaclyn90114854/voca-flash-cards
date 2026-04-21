@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>영어 어휘 카드 — 30단어</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #f5f4f0;
+    --surface: #ffffff;
+    --surface2: #f0efe9;
+    --border: rgba(0,0,0,0.12);
+    --border2: rgba(0,0,0,0.22);
+    --text: #1a1a18;
+    --text2: #6b6b66;
+    --text3: #9b9b96;
+    --radius: 14px;
+    --radius-sm: 9px;
+    --green-bg: #e1f5ee;
+    --green-border: #1d9e75;
+    --green-text: #085041;
+    --red-bg: #fcebeb;
+    --red-border: #e24b4a;
+    --red-text: #501313;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #1c1c1a;
+      --surface: #272724;
+      --surface2: #313130;
+      --border: rgba(255,255,255,0.1);
+      --border2: rgba(255,255,255,0.2);
+      --text: #f0efe9;
+      --text2: #9b9b96;
+      --text3: #6b6b66;
+      --green-bg: #0a2e22;
+      --green-border: #1d9e75;
+      --green-text: #9fe1cb;
+      --red-bg: #2e0f0f;
+      --red-border: #e24b4a;
+      --red-text: #f09595;
+    }
+  }
+
+  html, body { min-height: 100%; background: var(--bg); color: var(--text); font-family: -apple-system, 'Noto Sans KR', BlinkMacSystemFont, 'Segoe UI', sans-serif; line-height: 1.6; }
+  body { display: flex; justify-content: center; padding: 2rem 1rem 4rem; }
+  .app { width: 100%; max-width: 520px; }
+
+  .app-header { display: flex; align-items: center; gap: 10px; margin-bottom: 2rem; }
+  .app-logo { width: 36px; height: 36px; background: var(--text); border-radius: 9px; display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0; }
+  .app-title { font-size: 17px; font-weight: 600; }
+  .app-sub { font-size: 12px; color: var(--text2); }
+
+  .screen { display: none; }
+  .screen.active { display: block; }
+
+  .back-btn { background: transparent; border: none; color: var(--text2); font-size: 13px; cursor: pointer; padding: 0 0 1.25rem; display: flex; align-items: center; gap: 5px; font-family: inherit; }
+  .back-btn:hover { color: var(--text); }
+
+  .prog-bar { height: 3px; background: var(--border); border-radius: 2px; margin-bottom: 1.75rem; overflow: hidden; }
+  .prog-fill { height: 100%; background: var(--text); border-radius: 2px; transition: width .35s ease; }
+
+  /* HOME */
+  .home-hero { margin-bottom: 2rem; }
+  .home-title { font-size: 26px; font-weight: 700; letter-spacing: -.5px; margin-bottom: .35rem; }
+  .home-desc { color: var(--text2); font-size: 14px; line-height: 1.7; }
+  .tag-row { display: flex; gap: 6px; flex-wrap: wrap; margin-top: .75rem; }
+  .tag { font-size: 12px; padding: 3px 10px; border-radius: 20px; border: 0.5px solid var(--border2); color: var(--text2); }
+  .home-btns { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .mode-card { padding: 1.25rem; border: 0.5px solid var(--border2); border-radius: var(--radius); background: var(--surface); cursor: pointer; text-align: left; font-family: inherit; color: var(--text); transition: background .15s; }
+  .mode-card:hover { background: var(--surface2); }
+  .mode-icon { font-size: 22px; margin-bottom: .6rem; display: block; }
+  .mode-name { font-size: 15px; font-weight: 600; margin-bottom: .2rem; }
+  .mode-hint { font-size: 12px; color: var(--text2); line-height: 1.5; }
+
+  /* STUDY */
+  .card-scene { perspective: 900px; cursor: pointer; margin-bottom: 1.5rem; user-select: none; }
+  .card-inner { position: relative; height: 240px; transform-style: preserve-3d; transition: transform .45s cubic-bezier(.4,0,.2,1); }
+  .card-inner.flipped { transform: rotateY(180deg); }
+  .card-face { position: absolute; inset: 0; backface-visibility: hidden; -webkit-backface-visibility: hidden; border: 0.5px solid var(--border); border-radius: var(--radius); background: var(--surface); display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 2rem 2rem 3rem; text-align: center; gap: .3rem; }
+  .card-face.back { transform: rotateY(180deg); }
+  .card-word { font-size: 34px; font-weight: 700; letter-spacing: -.5px; line-height: 1.2; }
+  .card-pos { font-size: 12px; color: var(--text2); background: var(--surface2); padding: 2px 8px; border-radius: 20px; margin-top: .2rem; }
+  .card-meaning { font-size: 24px; font-weight: 600; line-height: 1.5; }
+  .card-hint { position: absolute; bottom: 1rem; font-size: 11px; color: var(--text3); display: flex; align-items: center; gap: 4px; }
+  .card-hint::before { content: ''; display: inline-block; width: 10px; height: 10px; border-radius: 50%; border: 1.5px solid var(--text3); }
+
+  .nav-row { display: flex; align-items: center; gap: 10px; margin-bottom: 1rem; }
+  .nav-btn { padding: 9px 22px; border: 0.5px solid var(--border2); border-radius: var(--radius-sm); background: transparent; color: var(--text); cursor: pointer; font-size: 14px; font-family: inherit; transition: background .12s; }
+  .nav-btn:disabled { opacity: .3; cursor: default; }
+  .nav-btn:not(:disabled):hover { background: var(--surface2); }
+  .counter { flex: 1; text-align: center; font-size: 14px; color: var(--text2); }
+
+  .tool-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+  .tool-btn { padding: 9px 8px; border: 0.5px solid var(--border); border-radius: var(--radius-sm); background: transparent; color: var(--text2); cursor: pointer; font-size: 13px; font-family: inherit; text-align: center; transition: background .12s; }
+  .tool-btn:hover { background: var(--surface2); color: var(--text); }
+  .tool-btn.accent { border-color: var(--border2); color: var(--text); font-weight: 500; }
+
+  .key-hint { margin-top: 1.25rem; text-align: center; font-size: 12px; color: var(--text3); }
+  kbd { display: inline-block; padding: 1px 6px; border: 0.5px solid var(--border2); border-radius: 4px; font-size: 11px; font-family: monospace; color: var(--text2); background: var(--surface2); }
+
+  /* QUIZ */
+  .mode-tabs { display: flex; gap: 6px; margin-bottom: 1.5rem; background: var(--surface2); padding: 4px; border-radius: var(--radius-sm); }
+  .mode-tab { flex: 1; padding: 8px; border: none; border-radius: 7px; background: transparent; color: var(--text2); cursor: pointer; font-size: 13px; font-family: inherit; transition: background .15s, color .15s; }
+  .mode-tab.on { background: var(--surface); color: var(--text); font-weight: 600; box-shadow: 0 1px 4px rgba(0,0,0,0.08); }
+
+  .quiz-q-label { font-size: 12px; color: var(--text2); margin-bottom: .5rem; }
+  .quiz-q { min-height: 110px; padding: 1.75rem 1.5rem; border: 0.5px solid var(--border); border-radius: var(--radius); background: var(--surface); font-size: 28px; font-weight: 700; text-align: center; display: flex; align-items: center; justify-content: center; margin-bottom: 1.25rem; line-height: 1.4; letter-spacing: -.3px; }
+  .quiz-opts { display: grid; grid-template-columns: 1fr; gap: 9px; margin-bottom: 1rem; }
+  .opt { padding: 14px 18px; border: 0.5px solid var(--border2); border-radius: var(--radius-sm); background: var(--surface); color: var(--text); cursor: pointer; font-size: 15px; font-family: inherit; text-align: left; line-height: 1.5; transition: background .12s, border-color .12s; }
+  .opt:hover:not(:disabled) { background: var(--surface2); }
+  .opt.correct { border-color: var(--green-border) !important; background: var(--green-bg) !important; color: var(--green-text) !important; font-weight: 600; }
+  .opt.wrong   { border-color: var(--red-border)   !important; background: var(--red-bg)   !important; color: var(--red-text)   !important; }
+  .opt:disabled { cursor: default; }
+  .quiz-counter { text-align: center; font-size: 13px; color: var(--text2); }
+
+  /* RESULTS */
+  .result-wrap { text-align: center; padding: 2rem 0 1rem; }
+  .result-ring { width: 120px; height: 120px; border-radius: 50%; border: 4px solid var(--border); display: flex; flex-direction: column; align-items: center; justify-content: center; margin: 0 auto 1.5rem; }
+  .result-score { font-size: 36px; font-weight: 700; }
+  .result-total { font-size: 13px; color: var(--text2); }
+  .result-pct { font-size: 17px; font-weight: 600; margin-bottom: .4rem; }
+  .result-msg { color: var(--text2); font-size: 14px; margin-bottom: 2rem; }
+  .result-btns { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .res-btn { padding: 14px; border: 0.5px solid var(--border2); border-radius: var(--radius); background: var(--surface); color: var(--text); cursor: pointer; font-size: 14px; font-weight: 500; font-family: inherit; transition: background .12s; }
+  .res-btn:hover { background: var(--surface2); }
+  .res-btn.primary { background: var(--text); color: var(--bg); border-color: var(--text); }
+  .res-btn.primary:hover { opacity: .85; }
+
+  .footer { margin-top: 3rem; text-align: center; font-size: 12px; color: var(--text3); }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <div class="app-header">
+    <div class="app-logo">📚</div>
+    <div>
+      <div class="app-title">영어 어휘 카드</div>
+      <div class="app-sub">30단어 · 수능 대비</div>
+    </div>
+  </div>
+
+  <!-- HOME -->
+  <div class="screen active" id="s-home">
+    <div class="home-hero">
+      <div class="home-title">어휘 학습을<br>시작해 볼까요?</div>
+      <div class="home-desc">플래시카드로 단어를 익히고, 퀴즈로 실력을 확인하세요.</div>
+      <div class="tag-row">
+        <span class="tag">30개 단어</span>
+        <span class="tag">플래시카드</span>
+        <span class="tag">4지선다 퀴즈</span>
+        <span class="tag">영→한 / 한→영</span>
+      </div>
+    </div>
+    <div class="home-btns">
+      <button class="mode-card" onclick="goStudy()">
+        <span class="mode-icon">📖</span>
+        <div class="mode-name">카드 학습</div>
+        <div class="mode-hint">단어를 보고 클릭해서 뜻을 확인하세요</div>
+      </button>
+      <button class="mode-card" onclick="goQuiz()">
+        <span class="mode-icon">✏️</span>
+        <div class="mode-name">퀴즈 테스트</div>
+        <div class="mode-hint">4지선다로 자신의 실력을 점검하세요</div>
+      </button>
+    </div>
+  </div>
+
+  <!-- STUDY -->
+  <div class="screen" id="s-study">
+    <button class="back-btn" onclick="goHome()">← 홈으로</button>
+    <div class="prog-bar"><div class="prog-fill" id="sp"></div></div>
+    <div class="card-scene" onclick="flip()">
+      <div class="card-inner" id="ci">
+        <div class="card-face front">
+          <div class="card-word" id="cw"></div>
+          <div class="card-pos"  id="cp"></div>
+          <div class="card-hint">클릭하여 뜻 보기</div>
+        </div>
+        <div class="card-face back">
+          <div class="card-meaning" id="cm"></div>
+          <div class="card-pos"    id="cpb" style="margin-top:.3rem"></div>
+          <div class="card-hint">클릭하여 단어 보기</div>
+        </div>
+      </div>
+    </div>
+    <div class="nav-row">
+      <button class="nav-btn" id="bp" onclick="prev()">← 이전</button>
+      <div class="counter" id="sc"></div>
+      <button class="nav-btn" id="bn" onclick="next()">다음 →</button>
+    </div>
+    <div class="tool-row">
+      <button class="tool-btn" onclick="shuffleDeck()">🔀 섞기</button>
+      <button class="tool-btn" onclick="resetDeck()">↩ 처음부터</button>
+      <button class="tool-btn accent" onclick="goQuiz()">퀴즈 시작 →</button>
+    </div>
+    <div class="key-hint">
+      <kbd>←</kbd> <kbd>→</kbd> 이동 &nbsp;·&nbsp; <kbd>Space</kbd> 뒤집기
+    </div>
+  </div>
+
+  <!-- QUIZ -->
+  <div class="screen" id="s-quiz">
+    <button class="back-btn" onclick="goHome()">← 홈으로</button>
+    <div class="prog-bar"><div class="prog-fill" id="qp"></div></div>
+    <div class="mode-tabs">
+      <button class="mode-tab on" id="tab-en" onclick="setMode('en')">영어 → 한국어</button>
+      <button class="mode-tab"    id="tab-ko" onclick="setMode('ko')">한국어 → 영어</button>
+    </div>
+    <div class="quiz-q-label" id="qlabel"></div>
+    <div class="quiz-q" id="qq"></div>
+    <div class="quiz-opts" id="qo"></div>
+    <div class="quiz-counter" id="qc"></div>
+  </div>
+
+  <!-- RESULTS -->
+  <div class="screen" id="s-results">
+    <div class="result-wrap">
+      <div class="result-ring">
+        <div class="result-score" id="rscore"></div>
+        <div class="result-total" id="rtotal"></div>
+      </div>
+      <div class="result-pct" id="rpct"></div>
+      <div class="result-msg" id="rmsg"></div>
+      <div class="result-btns">
+        <button class="res-btn" onclick="goStudy()">카드 복습</button>
+        <button class="res-btn primary" onclick="goQuiz()">다시 테스트</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer">수능 영어 어휘 학습 카드</div>
+</div>
+
+<script>
+const V = [
+  {w:"experiment",      t:"v.",  m:"실험하다"},
+  {w:"manipulate",      t:"v.",  m:"조작하다"},
+  {w:"public",          t:"a.",  m:"대중의"},
+  {w:"favorable",       t:"a.",  m:"우호적인, 호의적인"},
+  {w:"request",         t:"v.",  m:"요청하다"},
+  {w:"application",     t:"n.",  m:"지원서"},
+  {w:"serve",           t:"v.",  m:"대접하다"},
+  {w:"literacy",        t:"n.",  m:"문해력, 읽고 쓰는 능력"},
+  {w:"evaluate",        t:"v.",  m:"평가하다"},
+  {w:"literate",        t:"a.",  m:"읽고 쓸 수 있는"},
+  {w:"detect",          t:"v.",  m:"감지하다, 파악하다"},
+  {w:"misinform",       t:"v.",  m:"잘못된 정보를 제공하다"},
+  {w:"deceive",         t:"v.",  m:"속이다, 기만하다"},
+  {w:"influential",     t:"a.",  m:"영향력이 있는"},
+  {w:"distract",        t:"v.",  m:"방해하다, 주의를 딴 데로 돌리다"},
+  {w:"suspicious",      t:"a.",  m:"의심스러운, 의심하는"},
+  {w:"credible",        t:"a.",  m:"믿을 만한, 신뢰할 수 있는"},
+  {w:"suspect",         t:"v.",  m:"의심하다"},
+  {w:"financial",       t:"a.",  m:"재정적인, 금전적인"},
+  {w:"hatred",          t:"n.",  m:"증오, 적대감"},
+  {w:"questionable",    t:"a.",  m:"의심스러운"},
+  {w:"source",          t:"n.",  m:"출처, 원천"},
+  {w:"reference",       t:"n.",  m:"참고문헌, 언급"},
+  {w:"reliable",        t:"a.",  m:"믿을 만한"},
+  {w:"credibility",     t:"n.",  m:"신뢰도, 신뢰성"},
+  {w:"vast",            t:"a.",  m:"광범위한, 방대한"},
+  {w:"spread",          t:"v.",  m:"퍼지다, 퍼트리다"},
+  {w:"get out of hand", t:"구",  m:"통제를 벗어나다, 감당할 수 없게 되다"},
+  {w:"stir up",         t:"구",  m:"불러일으키다, 유발하다"},
+  {w:"sort through",    t:"구",  m:"자세히 살펴보다"}
+];
+
+let deck = [...V], si = 0, flipped = false;
+let qDeck = [], qi = 0, qs = 0, qa = false, qMode = 'en';
+
+function sh(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function show(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById('s-' + id).classList.add('active');
+  window.scrollTo(0, 0);
+}
+
+function goHome() { show('home'); }
+
+function goStudy() {
+  deck = [...V]; si = 0; flipped = false;
+  renderCard();
+  show('study');
+}
+
+function renderCard() {
+  const v = deck[si];
+  document.getElementById('cw').textContent  = v.w;
+  document.getElementById('cp').textContent  = v.t;
+  document.getElementById('cm').textContent  = v.m;
+  document.getElementById('cpb').textContent = v.t;
+  document.getElementById('ci').classList.remove('flipped');
+  flipped = false;
+  const n = deck.length;
+  document.getElementById('sc').textContent = (si + 1) + ' / ' + n;
+  document.getElementById('sp').style.width = ((si + 1) / n * 100) + '%';
+  document.getElementById('bp').disabled = si === 0;
+  document.getElementById('bn').disabled = si === n - 1;
+}
+
+function flip() {
+  flipped = !flipped;
+  document.getElementById('ci').classList.toggle('flipped', flipped);
+}
+
+function prev() { if (si > 0) { si--; renderCard(); } }
+function next() { if (si < deck.length - 1) { si++; renderCard(); } }
+function shuffleDeck() { deck = sh(deck); si = 0; renderCard(); }
+function resetDeck()   { deck = [...V];   si = 0; renderCard(); }
+
+function setMode(m) {
+  qMode = m;
+  document.getElementById('tab-en').classList.toggle('on', m === 'en');
+  document.getElementById('tab-ko').classList.toggle('on', m === 'ko');
+  qi = 0; qs = 0; qa = false;
+  qDeck = sh(V);
+  renderQ();
+}
+
+function goQuiz() {
+  qDeck = sh(V); qi = 0; qs = 0; qa = false;
+  renderQ();
+  show('quiz');
+}
+
+function renderQ() {
+  if (qi >= qDeck.length) { showResults(); return; }
+  qa = false;
+  const v    = qDeck[qi];
+  const isEn = qMode === 'en';
+  document.getElementById('qlabel').textContent = isEn ? '이 단어의 뜻은?' : '이 뜻에 해당하는 단어는?';
+  document.getElementById('qq').textContent     = isEn ? v.w : v.m;
+  document.getElementById('qc').textContent     = (qi + 1) + ' / ' + qDeck.length;
+  document.getElementById('qp').style.width     = (qi / qDeck.length * 100) + '%';
+
+  const pool  = V.filter(x => isEn ? x.m !== v.m : x.w !== v.w);
+  const wrong = sh(pool).slice(0, 3);
+  const opts  = sh([v, ...wrong]);
+  const container = document.getElementById('qo');
+  container.innerHTML = '';
+  opts.forEach(o => {
+    const btn = document.createElement('button');
+    btn.className   = 'opt';
+    btn.textContent = isEn ? o.m : o.w;
+    const correct   = isEn ? o.m === v.m : o.w === v.w;
+    const correctVal = isEn ? v.m : v.w;
+    btn.onclick = () => answer(btn, correct, correctVal);
+    container.appendChild(btn);
+  });
+}
+
+function answer(btn, correct, correctVal) {
+  if (qa) return;
+  qa = true;
+  if (correct) { btn.classList.add('correct'); qs++; }
+  else {
+    btn.classList.add('wrong');
+    document.querySelectorAll('.opt').forEach(b => {
+      if (b.textContent === correctVal) b.classList.add('correct');
+    });
+  }
+  document.querySelectorAll('.opt').forEach(b => b.disabled = true);
+  setTimeout(() => { qi++; renderQ(); }, 1300);
+}
+
+function showResults() {
+  const total = qDeck.length;
+  const pct   = Math.round(qs / total * 100);
+  document.getElementById('rscore').textContent = qs;
+  document.getElementById('rtotal').textContent = '/ ' + total;
+  document.getElementById('rpct').textContent   = '정답률 ' + pct + '%';
+  let msg;
+  if      (pct >= 90) msg = '완벽해요! 🎉 모든 단어를 잘 알고 있어요.';
+  else if (pct >= 70) msg = '잘했어요! 💪 조금 더 연습하면 완벽해요.';
+  else if (pct >= 50) msg = '절반 이상 맞았어요. 틀린 단어를 복습해 보세요.';
+  else                msg = '카드 학습으로 더 연습한 뒤 다시 도전해 보세요!';
+  document.getElementById('rmsg').textContent = msg;
+  show('results');
+}
+
+document.addEventListener('keydown', e => {
+  if (!document.getElementById('s-study').classList.contains('active')) return;
+  if (e.key === ' ' || e.key === 'Enter') { e.preventDefault(); flip(); }
+  if (e.key === 'ArrowLeft')  prev();
+  if (e.key === 'ArrowRight') next();
+});
+</script>
+</body>
+</html>
