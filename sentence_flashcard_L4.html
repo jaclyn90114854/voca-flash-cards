@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>문장 해석 카드 — L4 Fake or Fact</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #f5f4f0;
+    --surface: #ffffff;
+    --surface2: #f0efe9;
+    --border: rgba(0,0,0,0.10);
+    --border2: rgba(0,0,0,0.20);
+    --text: #1a1a18;
+    --text2: #6b6b66;
+    --text3: #9b9b96;
+    --radius: 14px;
+    --radius-sm: 9px;
+    --green-bg: #e1f5ee;
+    --green-border: #1d9e75;
+    --green-text: #085041;
+    --red-bg: #fcebeb;
+    --red-border: #e24b4a;
+    --red-text: #501313;
+    --accent-bg: #eeedfe;
+    --accent-text: #3c3489;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #1c1c1a;
+      --surface: #272724;
+      --surface2: #313130;
+      --border: rgba(255,255,255,0.08);
+      --border2: rgba(255,255,255,0.18);
+      --text: #f0efe9;
+      --text2: #9b9b96;
+      --text3: #6b6b66;
+      --green-bg: #0a2e22;
+      --green-border: #1d9e75;
+      --green-text: #9fe1cb;
+      --red-bg: #2e0f0f;
+      --red-border: #e24b4a;
+      --red-text: #f09595;
+      --accent-bg: #26215c;
+      --accent-text: #afa9ec;
+    }
+  }
+
+  html, body { min-height: 100%; background: var(--bg); color: var(--text); font-family: -apple-system, 'Noto Sans KR', BlinkMacSystemFont, 'Segoe UI', sans-serif; line-height: 1.6; }
+  body { display: flex; justify-content: center; padding: 2rem 1rem 4rem; }
+  .app { width: 100%; max-width: 620px; }
+
+  /* HEADER */
+  .app-header { display: flex; align-items: center; gap: 10px; margin-bottom: 2rem; }
+  .app-logo { width: 36px; height: 36px; background: var(--text); border-radius: 9px; display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0; }
+  .app-title { font-size: 17px; font-weight: 600; }
+  .app-sub { font-size: 12px; color: var(--text2); }
+
+  .screen { display: none; }
+  .screen.active { display: block; }
+
+  .back-btn { background: transparent; border: none; color: var(--text2); font-size: 13px; cursor: pointer; padding: 0 0 1.25rem; display: flex; align-items: center; gap: 5px; font-family: inherit; }
+  .back-btn:hover { color: var(--text); }
+
+  /* PROGRESS */
+  .prog-bar { height: 3px; background: var(--border); border-radius: 2px; margin-bottom: 1.75rem; overflow: hidden; }
+  .prog-fill { height: 100%; background: var(--text); border-radius: 2px; transition: width .35s ease; }
+
+  /* HOME */
+  .home-hero { margin-bottom: 2rem; }
+  .home-title { font-size: 24px; font-weight: 700; letter-spacing: -.5px; margin-bottom: .35rem; line-height: 1.3; }
+  .home-desc { color: var(--text2); font-size: 14px; line-height: 1.7; }
+  .home-passage { margin-top: .75rem; font-size: 12px; font-style: italic; color: var(--text3); background: var(--surface2); padding: 8px 12px; border-radius: var(--radius-sm); border-left: 3px solid var(--border2); }
+  .tag-row { display: flex; gap: 6px; flex-wrap: wrap; margin-top: .75rem; }
+  .tag { font-size: 12px; padding: 3px 10px; border-radius: 20px; border: 0.5px solid var(--border2); color: var(--text2); }
+  .home-btns { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 1.25rem; }
+  .mode-card { padding: 1.25rem; border: 0.5px solid var(--border2); border-radius: var(--radius); background: var(--surface); cursor: pointer; text-align: left; font-family: inherit; color: var(--text); transition: background .15s; }
+  .mode-card:hover { background: var(--surface2); }
+  .mode-icon { font-size: 22px; margin-bottom: .6rem; display: block; }
+  .mode-name { font-size: 15px; font-weight: 600; margin-bottom: .2rem; }
+  .mode-hint { font-size: 12px; color: var(--text2); line-height: 1.5; }
+
+  /* Page filter */
+  .filter-row { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: .5rem; }
+  .filter-label { font-size: 12px; color: var(--text2); align-self: center; margin-right: 4px; }
+  .filter-btn { font-size: 12px; padding: 4px 12px; border: 0.5px solid var(--border2); border-radius: 20px; background: transparent; color: var(--text2); cursor: pointer; font-family: inherit; }
+  .filter-btn.on { background: var(--text); color: var(--bg); border-color: var(--text); }
+  .filter-btn:hover:not(.on) { background: var(--surface2); }
+
+  /* STUDY CARD */
+  .card-meta { display: flex; align-items: center; gap: 8px; margin-bottom: .75rem; }
+  .card-page { font-size: 11px; padding: 2px 8px; border-radius: 20px; background: var(--accent-bg); color: var(--accent-text); font-weight: 500; }
+  .card-num { font-size: 12px; color: var(--text3); }
+
+  .card-scene { perspective: 1000px; cursor: pointer; margin-bottom: 1.5rem; user-select: none; }
+  .card-inner { position: relative; min-height: 200px; transform-style: preserve-3d; transition: transform .45s cubic-bezier(.4,0,.2,1); }
+  .card-inner.flipped { transform: rotateY(180deg); }
+  .card-face { position: absolute; inset: 0; backface-visibility: hidden; -webkit-backface-visibility: hidden; border: 0.5px solid var(--border); border-radius: var(--radius); background: var(--surface); display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 2rem 2rem 3rem; text-align: center; }
+  .card-face.back { transform: rotateY(180deg); }
+  .card-en { font-size: 18px; font-weight: 500; line-height: 1.7; letter-spacing: -.1px; }
+  .card-ko { font-size: 18px; font-weight: 500; line-height: 1.7; word-break: keep-all; }
+  .card-hint { position: absolute; bottom: 1rem; font-size: 11px; color: var(--text3); display: flex; align-items: center; gap: 4px; }
+  .card-hint::before { content: ''; display: inline-block; width: 10px; height: 10px; border-radius: 50%; border: 1.5px solid var(--text3); }
+  /* Spacer to set min-height for absolute positioning */
+  .card-scene { min-height: 200px; }
+  .card-inner { height: 200px; }
+
+  .nav-row { display: flex; align-items: center; gap: 10px; margin-bottom: 1rem; }
+  .nav-btn { padding: 9px 20px; border: 0.5px solid var(--border2); border-radius: var(--radius-sm); background: transparent; color: var(--text); cursor: pointer; font-size: 14px; font-family: inherit; transition: background .12s; }
+  .nav-btn:disabled { opacity: .3; cursor: default; }
+  .nav-btn:not(:disabled):hover { background: var(--surface2); }
+  .counter { flex: 1; text-align: center; font-size: 14px; color: var(--text2); }
+
+  .tool-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+  .tool-btn { padding: 9px 8px; border: 0.5px solid var(--border); border-radius: var(--radius-sm); background: transparent; color: var(--text2); cursor: pointer; font-size: 13px; font-family: inherit; text-align: center; transition: background .12s; }
+  .tool-btn:hover { background: var(--surface2); color: var(--text); }
+  .tool-btn.accent { border-color: var(--border2); color: var(--text); font-weight: 500; }
+
+  .key-hint { margin-top: 1.25rem; text-align: center; font-size: 12px; color: var(--text3); }
+  kbd { display: inline-block; padding: 1px 6px; border: 0.5px solid var(--border2); border-radius: 4px; font-size: 11px; font-family: monospace; color: var(--text2); background: var(--surface2); }
+
+  /* QUIZ */
+  .quiz-mode-tabs { display: flex; gap: 6px; margin-bottom: 1rem; background: var(--surface2); padding: 4px; border-radius: var(--radius-sm); }
+  .quiz-tab { flex: 1; padding: 8px; border: none; border-radius: 7px; background: transparent; color: var(--text2); cursor: pointer; font-size: 12px; font-family: inherit; transition: background .15s, color .15s; }
+  .quiz-tab.on { background: var(--surface); color: var(--text); font-weight: 600; box-shadow: 0 1px 4px rgba(0,0,0,0.08); }
+
+  .quiz-q-label { font-size: 12px; color: var(--text2); margin-bottom: .5rem; }
+  .quiz-q { min-height: 130px; padding: 1.5rem; border: 0.5px solid var(--border); border-radius: var(--radius); background: var(--surface); font-size: 16px; font-weight: 500; text-align: center; display: flex; align-items: center; justify-content: center; margin-bottom: 1.25rem; line-height: 1.7; word-break: keep-all; }
+  .quiz-opts { display: grid; grid-template-columns: 1fr; gap: 9px; margin-bottom: 1rem; }
+  .opt { padding: 14px 16px; border: 0.5px solid var(--border2); border-radius: var(--radius-sm); background: var(--surface); color: var(--text); cursor: pointer; font-size: 14px; font-family: inherit; text-align: left; line-height: 1.6; transition: background .12s; word-break: keep-all; }
+  .opt:hover:not(:disabled) { background: var(--surface2); }
+  .opt.correct { border-color: var(--green-border) !important; background: var(--green-bg) !important; color: var(--green-text) !important; font-weight: 600; }
+  .opt.wrong   { border-color: var(--red-border)   !important; background: var(--red-bg)   !important; color: var(--red-text)   !important; }
+  .opt:disabled { cursor: default; }
+  .quiz-counter { text-align: center; font-size: 13px; color: var(--text2); }
+
+  /* RESULTS */
+  .result-wrap { text-align: center; padding: 2rem 0 1rem; }
+  .result-ring { width: 120px; height: 120px; border-radius: 50%; border: 4px solid var(--border); display: flex; flex-direction: column; align-items: center; justify-content: center; margin: 0 auto 1.5rem; }
+  .result-score { font-size: 36px; font-weight: 700; }
+  .result-total { font-size: 13px; color: var(--text2); }
+  .result-pct { font-size: 17px; font-weight: 600; margin-bottom: .4rem; }
+  .result-msg { color: var(--text2); font-size: 14px; margin-bottom: 2rem; word-break: keep-all; }
+  .result-btns { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .res-btn { padding: 14px; border: 0.5px solid var(--border2); border-radius: var(--radius); background: var(--surface); color: var(--text); cursor: pointer; font-size: 14px; font-weight: 500; font-family: inherit; transition: background .12s; }
+  .res-btn:hover { background: var(--surface2); }
+  .res-btn.primary { background: var(--text); color: var(--bg); border-color: var(--text); }
+  .res-btn.primary:hover { opacity: .85; }
+
+  .footer { margin-top: 3rem; text-align: center; font-size: 12px; color: var(--text3); }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <div class="app-header">
+    <div class="app-logo">📖</div>
+    <div>
+      <div class="app-title">문장 해석 카드</div>
+      <div class="app-sub">L4 Fake or Fact · 공통영어 1</div>
+    </div>
+  </div>
+
+  <!-- HOME -->
+  <div class="screen active" id="s-home">
+    <div class="home-hero">
+      <div class="home-title">Fake or Fact,<br>That Is the Question</div>
+      <div class="home-passage">High School Common English 1 · Lesson 4 Reading (pp. 83–87)</div>
+      <div class="tag-row">
+        <span class="tag">51개 문장</span>
+        <span class="tag">앞: 영어 문장</span>
+        <span class="tag">뒤: 한국어 해석</span>
+        <span class="tag">페이지별 필터</span>
+      </div>
+    </div>
+    <div class="home-btns">
+      <button class="mode-card" onclick="goStudy()">
+        <span class="mode-icon">📖</span>
+        <div class="mode-name">카드 학습</div>
+        <div class="mode-hint">영어 문장을 보고 클릭하여 해석을 확인하세요</div>
+      </button>
+      <button class="mode-card" onclick="goQuiz()">
+        <span class="mode-icon">✏️</span>
+        <div class="mode-name">퀴즈 테스트</div>
+        <div class="mode-hint">문장에 맞는 해석을 4개 중 골라보세요</div>
+      </button>
+    </div>
+    <div class="filter-row">
+      <span class="filter-label">페이지 선택:</span>
+      <button class="filter-btn on" id="hf-all"  onclick="setHomeFilter('all')">전체</button>
+      <button class="filter-btn"    id="hf-p83"  onclick="setHomeFilter('p83')">p.83</button>
+      <button class="filter-btn"    id="hf-p84"  onclick="setHomeFilter('p84')">p.84</button>
+      <button class="filter-btn"    id="hf-p85"  onclick="setHomeFilter('p85')">p.85</button>
+      <button class="filter-btn"    id="hf-p86"  onclick="setHomeFilter('p86')">p.86</button>
+      <button class="filter-btn"    id="hf-p87"  onclick="setHomeFilter('p87')">p.87</button>
+    </div>
+  </div>
+
+  <!-- STUDY -->
+  <div class="screen" id="s-study">
+    <button class="back-btn" onclick="goHome()">← 홈으로</button>
+    <div class="prog-bar"><div class="prog-fill" id="sp"></div></div>
+    <div class="card-meta">
+      <span class="card-page" id="cpg"></span>
+      <span class="card-num"  id="cnum"></span>
+    </div>
+    <div class="card-scene" onclick="flip()">
+      <div class="card-inner" id="ci">
+        <div class="card-face front">
+          <div class="card-en" id="cen"></div>
+          <div class="card-hint">클릭하여 해석 보기</div>
+        </div>
+        <div class="card-face back">
+          <div class="card-ko" id="cko"></div>
+          <div class="card-hint">클릭하여 문장 보기</div>
+        </div>
+      </div>
+    </div>
+    <div class="nav-row">
+      <button class="nav-btn" id="bp" onclick="prev()">← 이전</button>
+      <div class="counter" id="sc"></div>
+      <button class="nav-btn" id="bn" onclick="next()">다음 →</button>
+    </div>
+    <div class="tool-row">
+      <button class="tool-btn" onclick="shuffleDeck()">🔀 섞기</button>
+      <button class="tool-btn" onclick="resetDeck()">↩ 처음부터</button>
+      <button class="tool-btn accent" onclick="goQuiz()">퀴즈 시작 →</button>
+    </div>
+    <div class="key-hint">
+      <kbd>←</kbd> <kbd>→</kbd> 이동 &nbsp;·&nbsp; <kbd>Space</kbd> 뒤집기
+    </div>
+  </div>
+
+  <!-- QUIZ -->
+  <div class="screen" id="s-quiz">
+    <button class="back-btn" onclick="goHome()">← 홈으로</button>
+    <div class="prog-bar"><div class="prog-fill" id="qp"></div></div>
+    <div class="quiz-mode-tabs">
+      <button class="quiz-tab on" id="qtab-en" onclick="setQMode('en')">영어 → 한국어</button>
+      <button class="quiz-tab"    id="qtab-ko" onclick="setQMode('ko')">한국어 → 영어</button>
+    </div>
+    <div class="quiz-q-label" id="qlabel"></div>
+    <div class="quiz-q" id="qq"></div>
+    <div class="quiz-opts" id="qo"></div>
+    <div class="quiz-counter" id="qc"></div>
+  </div>
+
+  <!-- RESULTS -->
+  <div class="screen" id="s-results">
+    <div class="result-wrap">
+      <div class="result-ring">
+        <div class="result-score" id="rscore"></div>
+        <div class="result-total" id="rtotal"></div>
+      </div>
+      <div class="result-pct" id="rpct"></div>
+      <div class="result-msg" id="rmsg"></div>
+      <div class="result-btns">
+        <button class="res-btn" onclick="goStudy()">카드 복습</button>
+        <button class="res-btn primary" onclick="goQuiz()">다시 테스트</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer">공통영어 1 · Lesson 4 문장 해석 카드</div>
+</div>
+
+<script>
+const ALL = [
+  // p.83
+  {p:"p.83", en:"British writer Oobah Butler wanted to experiment with how easily one can manipulate public opinion online.", ko:"영국인 작가인 우바 버틀러는 얼마나 쉽게 온라인에서 대중의 의견을 조작할 수 있는지 실험하기를 원했다."},
+  {p:"p.83", en:"He created a fake restaurant called The Shed at Dulwich.", ko:"그는 The Shed at Dulwich라는 가짜 식당을 만들었다."},
+  {p:"p.83", en:'Butler set up an account for his "restaurant" on a popular online review site.', ko:"버틀러는 인기 있는 온라인 리뷰 사이트에 그의 '식당' 계정을 만들었다."},
+  {p:"p.83", en:"He did not provide an exact address and wrote it was reservations only.", ko:"그는 정확한 주소를 제공하지 않았고 예약만 가능하다고 적었다."},
+  {p:"p.83", en:"He did this to make people think The Shed was a special restaurant.", ko:"그는 사람들이 The Shed가 특별한 식당이라고 생각하게 만들기 위해 이렇게 했다."},
+  // p.84
+  {p:"p.84", en:"He faked photos of The Shed's food with shaving cream, whitening tablets, and even his own foot.", ko:"그는 The Shed의 음식 사진을 면도 크림, 표백제, 그리고 심지어 그 자신의 발로 위조했다."},
+  {p:"p.84", en:"He then asked his friends to write favorable fake reviews on the review site.", ko:"그는 그러고 나서 친구들에게 리뷰 사이트에 우호적인 가짜 리뷰를 써 달라고 요청했다."},
+  {p:"p.84", en:'Things quickly got, in Butler\'s words, "a little out of hand."', ko:"버틀러의 말에 의하면, 상황은 빠르게 '조금 손 쓸 수 없게' 되었다."},
+  {p:"p.84", en:"From the lowest of the charts of the review site, The Shed continuously climbed the London rankings.", ko:"리뷰 사이트의 최하위에서 시작한 The Shed는 런던 순위를 계속해서 올라갔다."},
+  {p:"p.84", en:"He started getting e-mails and phone calls requesting reservations.", ko:"그는 예약을 요청하는 이메일과 전화를 받기 시작했다."},
+  {p:"p.84", en:'Interest further increased when he told callers The Shed was "fully booked for the next six weeks."', ko:"그가 전화를 건 사람들에게 The Shed가 '다음 6주간 예약이 꽉 찼다'고 말했을 때 관심은 더욱 증가했다."},
+  {p:"p.84", en:"Even funnier, food suppliers started guessing The Shed's address and sent him free samples, and many job applications came in.", ko:"더욱 재미있게도 식품 공급자들은 The Shed의 주소를 추측하기 시작했고 그에게 무료 샘플을 보냈으며, 많은 구직 지원서가 들어왔다."},
+  {p:"p.84", en:"These things happened without Butler serving a single meal.", ko:"이런 일들은 버틀러가 단 한 끼의 식사도 제공하지 않고 일어났다."},
+  {p:"p.84", en:"The Shed eventually became London's number-one restaurant on one of the most trusted restaurant review sites.", ko:"The Shed는 결국 가장 신뢰를 얻는 식당 리뷰 사이트 중 하나에서 런던의 1위 식당이 되었다."},
+  {p:"p.84", en:"According to Butler, The Shed held that ranking for two weeks.", ko:"버틀러의 말에 따르면 The Shed는 그 순위를 2주간 유지했다."},
+  // p.85
+  {p:"p.85", en:"Butler's story shows that much of what we see on the Internet cannot be trusted.", ko:"버틀러의 이야기는 우리가 인터넷에서 보는 것 중 많은 부분이 신뢰할 수 없음을 보여 준다."},
+  {p:"p.85", en:"This emphasizes the importance of digital literacy.", ko:"이것은 디지털 문해력의 중요성을 강조한다."},
+  {p:"p.85", en:"Digital literacy is about more than just using computers.", ko:"디지털 문해력은 그저 컴퓨터를 사용하는 것 그 이상에 관한 것이다."},
+  {p:"p.85", en:"It is the ability to use digital technology to find, evaluate, create, and communicate information.", ko:"그것은 정보를 찾고, 평가하고, 만들고, 소통하기 위해 디지털 기술을 이용하는 능력이다."},
+  {p:"p.85", en:"To become digitally literate, we need to develop an attitude and knowledge that enable us to detect false information online.", ko:"디지털 문해력을 갖추기 위해 우리는 우리가 온라인상의 거짓 정보를 탐지할 수 있게 하는 태도와 지식을 키워야 한다."},
+  {p:"p.85", en:"False information is any information that misinforms or deceives people.", ko:"거짓 정보는 잘못된 정보를 제공하거나 사람들을 속이는 모든 정보이다."},
+  {p:"p.85", en:"It can be about anything such as health, the environment, and economics across many platforms.", ko:"그것은 많은 플랫폼상의 건강, 환경, 그리고 경제와 같은 모든 것에 관한 것일 수 있다."},
+  {p:"p.85", en:"It can be influential, as The Shed incident shows.", ko:"그것은 The Shed 사건이 보여 주는 것처럼 영향력이 있을 수 있다."},
+  {p:"p.85", en:"If people had been digitally literate, they would not have been fooled by The Shed experiment so easily.", ko:"만약 사람들이 디지털 문해력이 있었더라면 그들은 The Shed 실험에 그렇게 쉽게 속아 넘어가지 않았을 것이다."},
+  {p:"p.85", en:"Digitally literate people would have carefully considered information about The Shed without being distracted by other people's reactions.", ko:"디지털 문해력이 있는 사람들은 다른 사람들의 반응에 방해받지 않고 The Shed에 관한 정보를 신중하게 고려했을 것이다."},
+  {p:"p.85", en:"They would have been suspicious that the restaurant did not have an address.", ko:"그들은 그 식당에 주소가 없다는 것을 의심했을 것이다."},
+  {p:"p.85", en:"They would have wondered why reviews on the restaurant did not appear in other more credible media.", ko:"그들은 왜 이 식당에 대한 리뷰가 다른 더 믿을 만한 매체에 나타나지 않는지 궁금해했을 것이다."},
+  {p:"p.85", en:"If they had done these things, they would likely have suspected that something was not right.", ko:"만약 그들이 이런 것들을 했더라면 그들은 무언가 옳지 않다는 것을 의심했을 것이다."},
+  // p.86
+  {p:"p.86", en:"Fortunately, The Shed incident was an experiment that caused little damage.", ko:"다행히도, The Shed 사건은 피해를 거의 끼치지 않은 실험이었다."},
+  {p:"p.86", en:"However, false information can cause emotional or financial harm to people.", ko:"그러나 거짓 정보는 사람들에게 정서적 또는 재정적 피해를 유발할 수 있다."},
+  {p:"p.86", en:"For example, false information about a certain gender or belief group can stir up hatred against that group.", ko:"예를 들어, 특정 성별 혹은 신앙 집단에 대한 거짓 정보는 그 집단에 대한 적대감을 불러일으킬 수 있다."},
+  {p:"p.86", en:"It can cause fights between those who support the group and those who do not.", ko:"그것은 그 집단을 지지하는 사람들과 그렇지 않은 사람들 사이의 싸움을 유발할 수 있다."},
+  {p:"p.86", en:"In addition, misleading online reviews about questionable products often trick people into wasting money.", ko:"게다가, 의심스러운 상품에 대한 잘못된 정보를 주는 온라인 리뷰는 종종 사람들을 속여 돈을 낭비하게 한다."},
+  {p:"p.86", en:"To avoid being deceived by false information, we need to develop a habit of critically evaluating what we see online.", ko:"거짓 정보에 속는 것을 피하기 위해 우리는 우리가 온라인상에서 보는 것을 비판적으로 평가하는 습관을 길러야 한다."},
+  {p:"p.86", en:"If you see a story that looks too good or too bad to be true, check the source first.", ko:"만약 당신이 너무 좋거나 너무 나빠서 사실일 것 같지 않은 이야기를 본다면 출처를 먼저 확인해 보아라."},
+  {p:"p.86", en:"Look at the website the story comes from.", ko:"그 이야기가 나온 웹 사이트를 살펴보아라."},
+  {p:"p.86", en:"Does it look real? Are there spelling errors? Does it have other stories or just the one you read?", ko:"진짜처럼 보이는가? 철자 오류가 있는가? 다른 이야기들도 있는가, 아니면 당신이 읽은 것 딱 하나만 가지고 있는가?"},
+  {p:"p.86", en:"Check that the story contains references and links to other information.", ko:"이야기가 참고 문헌과 다른 정보로 연결되는 링크를 포함하는지 확인해 보아라."},
+  {p:"p.86", en:"Click on those links and see if the other information looks reliable.", ko:"그 링크를 클릭하고 다른 정보가 믿을 만해 보이는지 확인해라."},
+  {p:"p.86", en:"Websites with false information often do not have many real stories about other topics.", ko:"거짓 정보가 있는 웹 사이트들은 종종 다른 주제에 대한 많은 실제 이야기들을 가지고 있지 않다."},
+  {p:"p.86", en:"They also often have lots of advertisements that pop up when you visit the sites.", ko:"그들은 또한 당신이 사이트를 방문했을 때 팝업으로 뜨는 많은 광고가 흔하다."},
+  // p.87
+  {p:"p.87", en:"You should then check the credibility of the content creator.", ko:"그러고 나서 당신은 내용 창작자의 신뢰도를 확인해야 한다."},
+  {p:"p.87", en:"If a story has no writer's name, this could be a sign that its content is questionable.", ko:"만약 이야기에 작가 이름이 없다면 이것은 그것의 내용이 의심스럽다는 신호일 수 있다."},
+  {p:"p.87", en:"If there is a name, find out what and where the person has reported before.", ko:"만약 이름이 있다면 그 사람이 이전에 무엇을 어디에 보도했는지 찾아보아라."},
+  {p:"p.87", en:"If the person has not written anything else or writes for a website that looks unreliable, think twice before believing the content.", ko:"만약 그 사람이 아무것도 쓰지 않았거나 신뢰할 수 없어 보이는 웹 사이트에 글을 쓴다면, 그 내용을 믿기 전에 두 번 생각해라."},
+  {p:"p.87", en:"Finally, check who else is reporting the story.", ko:"마지막으로, 다른 누가 그 이야기를 보도하고 있는지 확인해라."},
+  {p:"p.87", en:"If no other media are reporting the same story, the story may not be true.", ko:"만약 똑같은 이야기를 보도하는 다른 매체가 없다면, 그 이야기는 사실이 아닐 수도 있다."},
+  {p:"p.87", en:"Pick a few keywords from the story and put them in a search site to see if other media are supporting the story.", ko:"다른 매체가 이 이야기를 뒷받침하는지 확인하기 위해 이야기에서 몇몇 키워드를 골라 검색 사이트에 입력해 보아라."},
+  {p:"p.87", en:"Sorting through the vast amount of information created and shared online is challenging.", ko:"온라인에서 만들어지고 공유된 엄청난 양의 정보를 살펴보는 것은 어렵다."},
+  {p:"p.87", en:"However, it is important that we know what false information is and how it spreads.", ko:"그러나 거짓 정보가 무엇이고 그것이 어떻게 확산되는지 우리가 아는 것이 중요하다."},
+  {p:"p.87", en:"The better we recognize false information, the better we will be at avoiding it and helping others do the same.", ko:"우리가 거짓 정보를 더 잘 인지할수록, 우리는 그것을 피하고 다른 사람들도 그렇게 하도록 돕는 것을 더 잘하게 될 것이다."}
+];
+
+let activeFilter = 'all';
+let deck = [], si = 0, flipped = false;
+let qDeck = [], qi = 0, qs = 0, qa = false, qMode = 'en';
+
+function sh(arr) {
+  const a = [...arr];
+  for (let i = a.length-1; i > 0; i--) {
+    const j = Math.floor(Math.random()*(i+1));
+    [a[i],a[j]]=[a[j],a[i]];
+  }
+  return a;
+}
+
+function filtered() {
+  if (activeFilter === 'all') return [...ALL];
+  return ALL.filter(v => v.p === activeFilter.replace('p','p.'));
+}
+
+function show(id) {
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById('s-'+id).classList.add('active');
+  window.scrollTo(0,0);
+}
+
+function setHomeFilter(f) {
+  activeFilter = f;
+  document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('on'));
+  document.getElementById('hf-'+f).classList.add('on');
+}
+
+function goHome() { show('home'); }
+
+function goStudy() {
+  deck = filtered(); si = 0; flipped = false;
+  renderCard();
+  show('study');
+}
+
+function renderCard() {
+  const v = deck[si];
+  document.getElementById('cen').textContent  = v.en;
+  document.getElementById('cko').textContent  = v.ko;
+  document.getElementById('cpg').textContent  = v.p;
+  document.getElementById('ci').classList.remove('flipped');
+  flipped = false;
+  const n = deck.length;
+  document.getElementById('cnum').textContent = '문장 ' + (si+1) + ' / ' + n;
+  document.getElementById('sc').textContent   = (si+1) + ' / ' + n;
+  document.getElementById('sp').style.width   = ((si+1)/n*100) + '%';
+  document.getElementById('bp').disabled = si === 0;
+  document.getElementById('bn').disabled = si === n-1;
+}
+
+function flip() {
+  flipped = !flipped;
+  document.getElementById('ci').classList.toggle('flipped', flipped);
+}
+function prev() { if(si>0){ si--; renderCard(); } }
+function next() { if(si<deck.length-1){ si++; renderCard(); } }
+function shuffleDeck() { deck = sh(deck); si=0; renderCard(); }
+function resetDeck()   { deck = filtered(); si=0; renderCard(); }
+
+function setQMode(m) {
+  qMode = m;
+  document.getElementById('qtab-en').classList.toggle('on', m==='en');
+  document.getElementById('qtab-ko').classList.toggle('on', m==='ko');
+  qi=0; qs=0; qa=false; qDeck=sh(filtered());
+  renderQ();
+}
+
+function goQuiz() {
+  qDeck=sh(filtered()); qi=0; qs=0; qa=false;
+  renderQ();
+  show('quiz');
+}
+
+function renderQ() {
+  if(qi>=qDeck.length){ showResults(); return; }
+  qa=false;
+  const v = qDeck[qi];
+  const isEn = qMode==='en';
+  document.getElementById('qlabel').textContent = isEn ? '이 문장의 올바른 해석은?' : '이 해석에 해당하는 영어 문장은?';
+  document.getElementById('qq').textContent     = isEn ? v.en : v.ko;
+  document.getElementById('qc').textContent     = (qi+1) + ' / ' + qDeck.length;
+  document.getElementById('qp').style.width     = (qi/qDeck.length*100) + '%';
+
+  const pool  = filtered().filter(x=> isEn ? x.ko!==v.ko : x.en!==v.en);
+  const wrong = sh(pool).slice(0,3);
+  const opts  = sh([v,...wrong]);
+  const container = document.getElementById('qo');
+  container.innerHTML='';
+  opts.forEach(o=>{
+    const btn=document.createElement('button');
+    btn.className='opt';
+    btn.textContent = isEn ? o.ko : o.en;
+    const correct   = isEn ? o.ko===v.ko : o.en===v.en;
+    const correctVal= isEn ? v.ko : v.en;
+    btn.onclick=()=>answer(btn, correct, correctVal);
+    container.appendChild(btn);
+  });
+}
+
+function answer(btn, correct, correctVal) {
+  if(qa) return;
+  qa=true;
+  if(correct){ btn.classList.add('correct'); qs++; }
+  else {
+    btn.classList.add('wrong');
+    document.querySelectorAll('.opt').forEach(b=>{ if(b.textContent===correctVal) b.classList.add('correct'); });
+  }
+  document.querySelectorAll('.opt').forEach(b=>b.disabled=true);
+  setTimeout(()=>{ qi++; renderQ(); }, 1400);
+}
+
+function showResults() {
+  const total = qDeck.length;
+  const pct   = Math.round(qs/total*100);
+  document.getElementById('rscore').textContent = qs;
+  document.getElementById('rtotal').textContent = '/ '+total;
+  document.getElementById('rpct').textContent   = '정답률 '+pct+'%';
+  let msg;
+  if      (pct>=90) msg='완벽해요! 🎉 본문을 정확하게 이해하고 있어요.';
+  else if (pct>=70) msg='잘했어요! 💪 조금 더 연습하면 완벽해요.';
+  else if (pct>=50) msg='절반 이상 맞았어요. 틀린 문장을 복습해 보세요.';
+  else              msg='카드 학습으로 더 연습한 뒤 다시 도전해 보세요!';
+  document.getElementById('rmsg').textContent = msg;
+  show('results');
+}
+
+document.addEventListener('keydown', e=>{
+  if(!document.getElementById('s-study').classList.contains('active')) return;
+  if(e.key===' '||e.key==='Enter'){ e.preventDefault(); flip(); }
+  if(e.key==='ArrowLeft')  prev();
+  if(e.key==='ArrowRight') next();
+});
+</script>
+</body>
+</html>
