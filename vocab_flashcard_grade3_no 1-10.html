@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>고3 영어 어휘 카드 — 학습지 1~10</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #f4f3ef;
+    --surface: #ffffff;
+    --surface2: #eeede8;
+    --border: rgba(0,0,0,0.10);
+    --border2: rgba(0,0,0,0.20);
+    --text: #1a1a18;
+    --text2: #6b6b66;
+    --text3: #9b9b96;
+    --radius: 14px;
+    --radius-sm: 9px;
+    --green-bg: #e1f5ee; --green-border: #1d9e75; --green-text: #085041;
+    --red-bg: #fcebeb;   --red-border: #e24b4a;   --red-text: #501313;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #1c1c1a; --surface: #272724; --surface2: #313130;
+      --border: rgba(255,255,255,0.08); --border2: rgba(255,255,255,0.18);
+      --text: #f0efe9; --text2: #9b9b96; --text3: #6b6b66;
+      --green-bg: #0a2e22; --green-border: #1d9e75; --green-text: #9fe1cb;
+      --red-bg: #2e0f0f;   --red-border: #e24b4a;   --red-text: #f09595;
+    }
+  }
+
+  html, body { min-height: 100%; background: var(--bg); color: var(--text); font-family: -apple-system, 'Noto Sans KR', BlinkMacSystemFont, 'Segoe UI', sans-serif; }
+  body { display: flex; justify-content: center; padding: 2rem 1rem 4rem; }
+  .app { width: 100%; max-width: 560px; }
+
+  .app-header { display: flex; align-items: center; gap: 10px; margin-bottom: 2rem; }
+  .app-logo { width: 36px; height: 36px; background: var(--text); border-radius: 9px; display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0; }
+  .app-title { font-size: 17px; font-weight: 600; }
+  .app-sub { font-size: 12px; color: var(--text2); }
+
+  .screen { display: none; } .screen.active { display: block; }
+  .back-btn { background: transparent; border: none; color: var(--text2); font-size: 13px; cursor: pointer; padding: 0 0 1.25rem; display: flex; align-items: center; gap: 5px; font-family: inherit; }
+  .back-btn:hover { color: var(--text); }
+  .prog-bar { height: 3px; background: var(--border); border-radius: 2px; margin-bottom: 1.75rem; overflow: hidden; }
+  .prog-fill { height: 100%; background: var(--text); border-radius: 2px; transition: width .35s; }
+
+  /* HOME */
+  .home-title { font-size: 24px; font-weight: 700; letter-spacing: -.5px; margin-bottom: .3rem; }
+  .home-sub-text { color: var(--text2); font-size: 14px; margin-bottom: 1.25rem; }
+  .tag-row { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 1.5rem; }
+  .tag { font-size: 12px; padding: 3px 10px; border-radius: 20px; border: 0.5px solid var(--border2); color: var(--text2); }
+  .home-btns { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 1.5rem; }
+  .mode-card { padding: 1.25rem; border: 0.5px solid var(--border2); border-radius: var(--radius); background: var(--surface); cursor: pointer; text-align: left; font-family: inherit; color: var(--text); transition: background .15s; }
+  .mode-card:hover { background: var(--surface2); }
+  .mode-icon { font-size: 22px; margin-bottom: .6rem; display: block; }
+  .mode-name { font-size: 15px; font-weight: 600; margin-bottom: .2rem; }
+  .mode-hint { font-size: 12px; color: var(--text2); line-height: 1.5; }
+
+  .filter-label { font-size: 12px; color: var(--text2); margin-bottom: .5rem; }
+  .filter-row { display: flex; gap: 6px; flex-wrap: wrap; }
+  .filter-btn { font-size: 12px; padding: 4px 11px; border: 0.5px solid var(--border2); border-radius: 20px; background: transparent; color: var(--text2); cursor: pointer; font-family: inherit; transition: background .12s; }
+  .filter-btn.on { background: var(--text); color: var(--bg); border-color: var(--text); }
+  .filter-btn:hover:not(.on) { background: var(--surface2); }
+
+  /* STUDY */
+  .card-meta { display: flex; align-items: center; gap: 8px; margin-bottom: .75rem; }
+  .card-source { font-size: 11px; padding: 2px 9px; border-radius: 20px; background: var(--surface2); color: var(--text2); border: 0.5px solid var(--border2); }
+  .card-pos-tag { font-size: 11px; padding: 2px 9px; border-radius: 20px; background: #eeedfe; color: #3c3489; }
+  @media (prefers-color-scheme: dark) { .card-pos-tag { background: #26215c; color: #afa9ec; } }
+  .card-num { font-size: 12px; color: var(--text3); margin-left: auto; }
+
+  .card-scene { perspective: 900px; cursor: pointer; margin-bottom: 1.5rem; user-select: none; }
+  .card-inner { position: relative; height: 240px; transform-style: preserve-3d; transition: transform .45s cubic-bezier(.4,0,.2,1); }
+  .card-inner.flipped { transform: rotateY(180deg); }
+  .card-face { position: absolute; inset: 0; backface-visibility: hidden; -webkit-backface-visibility: hidden; border: 0.5px solid var(--border); border-radius: var(--radius); background: var(--surface); display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 1.75rem 1.75rem 3rem; text-align: center; gap: .4rem; }
+  .card-face.back { transform: rotateY(180deg); }
+  .card-word { font-size: 34px; font-weight: 700; letter-spacing: -.5px; line-height: 1.15; }
+  .card-meaning { font-size: 26px; font-weight: 600; line-height: 1.4; word-break: keep-all; }
+  .card-example { font-size: 13px; color: var(--text2); line-height: 1.65; font-style: italic; margin-top: .25rem; }
+  .card-hint { position: absolute; bottom: 1rem; font-size: 11px; color: var(--text3); display: flex; align-items: center; gap: 4px; }
+  .card-hint::before { content: ''; display: inline-block; width: 10px; height: 10px; border-radius: 50%; border: 1.5px solid var(--text3); }
+
+  .nav-row { display: flex; align-items: center; gap: 10px; margin-bottom: 1rem; }
+  .nav-btn { padding: 9px 20px; border: 0.5px solid var(--border2); border-radius: var(--radius-sm); background: transparent; color: var(--text); cursor: pointer; font-size: 14px; font-family: inherit; transition: background .12s; }
+  .nav-btn:disabled { opacity: .3; cursor: default; }
+  .nav-btn:not(:disabled):hover { background: var(--surface2); }
+  .counter { flex: 1; text-align: center; font-size: 14px; color: var(--text2); }
+  .tool-row { display: grid; grid-template-columns: repeat(3,1fr); gap: 8px; }
+  .tool-btn { padding: 9px 8px; border: 0.5px solid var(--border); border-radius: var(--radius-sm); background: transparent; color: var(--text2); cursor: pointer; font-size: 13px; font-family: inherit; text-align: center; transition: background .12s; }
+  .tool-btn:hover { background: var(--surface2); color: var(--text); }
+  .tool-btn.accent { border-color: var(--border2); color: var(--text); font-weight: 500; }
+  .key-hint { margin-top: 1.25rem; text-align: center; font-size: 12px; color: var(--text3); }
+  kbd { display: inline-block; padding: 1px 6px; border: 0.5px solid var(--border2); border-radius: 4px; font-size: 11px; font-family: monospace; color: var(--text2); background: var(--surface2); }
+
+  /* QUIZ */
+  .quiz-tabs { display: flex; gap: 6px; margin-bottom: 1.25rem; background: var(--surface2); padding: 4px; border-radius: var(--radius-sm); }
+  .quiz-tab { flex: 1; padding: 8px; border: none; border-radius: 7px; background: transparent; color: var(--text2); cursor: pointer; font-size: 12px; font-family: inherit; transition: background .15s, color .15s; }
+  .quiz-tab.on { background: var(--surface); color: var(--text); font-weight: 600; box-shadow: 0 1px 4px rgba(0,0,0,0.08); }
+
+  .quiz-q-label { font-size: 12px; color: var(--text2); margin-bottom: .5rem; }
+  .quiz-q { min-height: 110px; padding: 1.5rem; border: 0.5px solid var(--border); border-radius: var(--radius); background: var(--surface); font-size: 26px; font-weight: 700; text-align: center; display: flex; align-items: center; justify-content: center; margin-bottom: 1.25rem; line-height: 1.4; word-break: keep-all; letter-spacing: -.3px; }
+  .quiz-opts { display: grid; grid-template-columns: 1fr; gap: 9px; margin-bottom: 1rem; }
+  .opt { padding: 14px 16px; border: 0.5px solid var(--border2); border-radius: var(--radius-sm); background: var(--surface); color: var(--text); cursor: pointer; font-size: 15px; font-family: inherit; text-align: left; line-height: 1.5; transition: background .12s; word-break: keep-all; }
+  .opt:hover:not(:disabled) { background: var(--surface2); }
+  .opt.correct { border-color: var(--green-border)!important; background: var(--green-bg)!important; color: var(--green-text)!important; font-weight: 600; }
+  .opt.wrong   { border-color: var(--red-border)!important;   background: var(--red-bg)!important;   color: var(--red-text)!important; }
+  .opt:disabled { cursor: default; }
+  .quiz-counter { text-align: center; font-size: 13px; color: var(--text2); }
+
+  /* RESULTS */
+  .result-wrap { text-align: center; padding: 2rem 0 1rem; }
+  .result-ring { width: 120px; height: 120px; border-radius: 50%; border: 4px solid var(--border); display: flex; flex-direction: column; align-items: center; justify-content: center; margin: 0 auto 1.5rem; }
+  .result-score { font-size: 36px; font-weight: 700; }
+  .result-total { font-size: 13px; color: var(--text2); }
+  .result-pct { font-size: 17px; font-weight: 600; margin-bottom: .4rem; }
+  .result-msg { color: var(--text2); font-size: 14px; margin-bottom: 2rem; word-break: keep-all; }
+  .result-btns { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .res-btn { padding: 14px; border: 0.5px solid var(--border2); border-radius: var(--radius); background: var(--surface); color: var(--text); cursor: pointer; font-size: 14px; font-weight: 500; font-family: inherit; transition: background .12s; }
+  .res-btn:hover { background: var(--surface2); }
+  .res-btn.primary { background: var(--text); color: var(--bg); border-color: var(--text); }
+  .res-btn.primary:hover { opacity: .85; }
+  .footer { margin-top: 3rem; text-align: center; font-size: 12px; color: var(--text3); }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <div class="app-header">
+    <div class="app-logo">📘</div>
+    <div>
+      <div class="app-title">고3 영어 어휘 카드</div>
+      <div class="app-sub">학습지 1~10 · 52개 단어</div>
+    </div>
+  </div>
+
+  <!-- HOME -->
+  <div class="screen active" id="s-home">
+    <div class="home-title">어휘 학습 시작</div>
+    <div class="home-sub-text">앞면: 영어 단어 · 뒷면: 뜻 + 예문</div>
+    <div class="tag-row">
+      <span class="tag">52개 단어</span>
+      <span class="tag">예문 포함</span>
+      <span class="tag">영→한 / 한→영 퀴즈</span>
+      <span class="tag">유형별 필터</span>
+    </div>
+    <div class="home-btns">
+      <button class="mode-card" onclick="goStudy()">
+        <span class="mode-icon">📖</span>
+        <div class="mode-name">카드 학습</div>
+        <div class="mode-hint">단어를 보고 클릭해서 뜻과 예문을 확인하세요</div>
+      </button>
+      <button class="mode-card" onclick="goQuiz()">
+        <span class="mode-icon">✏️</span>
+        <div class="mode-name">퀴즈 테스트</div>
+        <div class="mode-hint">4지선다로 자신의 실력을 점검하세요</div>
+      </button>
+    </div>
+    <div class="filter-label">학습지 유형 선택</div>
+    <div class="filter-row" id="filter-row"></div>
+  </div>
+
+  <!-- STUDY -->
+  <div class="screen" id="s-study">
+    <button class="back-btn" onclick="goHome()">← 홈으로</button>
+    <div class="prog-bar"><div class="prog-fill" id="sp"></div></div>
+    <div class="card-meta">
+      <span class="card-source" id="csrc"></span>
+      <span class="card-pos-tag" id="cpos"></span>
+      <span class="card-num" id="cnum"></span>
+    </div>
+    <div class="card-scene" onclick="flip()">
+      <div class="card-inner" id="ci">
+        <div class="card-face front">
+          <div class="card-word" id="cw"></div>
+          <div class="card-hint">클릭하여 뜻 보기</div>
+        </div>
+        <div class="card-face back">
+          <div class="card-meaning" id="cm"></div>
+          <div class="card-example" id="ce"></div>
+          <div class="card-hint">클릭하여 단어 보기</div>
+        </div>
+      </div>
+    </div>
+    <div class="nav-row">
+      <button class="nav-btn" id="bp" onclick="prev()">← 이전</button>
+      <div class="counter" id="sc"></div>
+      <button class="nav-btn" id="bn" onclick="next()">다음 →</button>
+    </div>
+    <div class="tool-row">
+      <button class="tool-btn" onclick="shuffleDeck()">🔀 섞기</button>
+      <button class="tool-btn" onclick="resetDeck()">↩ 처음부터</button>
+      <button class="tool-btn accent" onclick="goQuiz()">퀴즈 시작 →</button>
+    </div>
+    <div class="key-hint"><kbd>←</kbd> <kbd>→</kbd> 이동 &nbsp;·&nbsp; <kbd>Space</kbd> 뒤집기</div>
+  </div>
+
+  <!-- QUIZ -->
+  <div class="screen" id="s-quiz">
+    <button class="back-btn" onclick="goHome()">← 홈으로</button>
+    <div class="prog-bar"><div class="prog-fill" id="qp"></div></div>
+    <div class="quiz-tabs">
+      <button class="quiz-tab on" id="qt-en" onclick="setQMode('en')">영어 → 한국어</button>
+      <button class="quiz-tab"    id="qt-ko" onclick="setQMode('ko')">한국어 → 영어</button>
+    </div>
+    <div class="quiz-q-label" id="qlabel"></div>
+    <div class="quiz-q" id="qq"></div>
+    <div class="quiz-opts" id="qo"></div>
+    <div class="quiz-counter" id="qc"></div>
+  </div>
+
+  <!-- RESULTS -->
+  <div class="screen" id="s-results">
+    <div class="result-wrap">
+      <div class="result-ring">
+        <div class="result-score" id="rscore"></div>
+        <div class="result-total" id="rtotal"></div>
+      </div>
+      <div class="result-pct" id="rpct"></div>
+      <div class="result-msg" id="rmsg"></div>
+      <div class="result-btns">
+        <button class="res-btn" onclick="goStudy()">카드 복습</button>
+        <button class="res-btn primary" onclick="goQuiz()">다시 테스트</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer">고3 영어 어휘 학습지 1~10 · 플래시카드</div>
+</div>
+
+<script>
+const ALL = [
+  {en:"anticipation",    ko:"기대감",            pos:"명사",  ex:"My heart was racing with anticipation.",                                          src:"02 심경·분위기"},
+  {en:"coldly",          ko:"차갑게",             pos:"부사",  ex:"'We're going to have to send you home,' he said coldly.",                         src:"02 심경·분위기"},
+  {en:"hold together",   ko:"마음을 유지하다",    pos:"구동사",ex:"I tried to hold it together but inside I was falling apart.",                     src:"02 심경·분위기"},
+  {en:"fall apart",      ko:"산산이 부서지다",    pos:"구동사",ex:"Inside I was falling apart.",                                                      src:"02 심경·분위기"},
+  {en:"commitment",      ko:"헌신; 전념",         pos:"명사",  ex:"Between work commitments and family obligations...",                              src:"03 필자의 주장"},
+  {en:"obligation",      ko:"의무",               pos:"명사",  ex:"...family obligations make time for exercise difficult.",                         src:"03 필자의 주장"},
+  {en:"dedicated",       ko:"전용의; 전념한",     pos:"형용사",ex:"There's no room for a dedicated workout.",                                        src:"03 필자의 주장"},
+  {en:"integrate",       ko:"통합시키다",         pos:"동사",  ex:"Integrating mini-exercises into household chores...",                             src:"03 필자의 주장"},
+  {en:"inevitable",      ko:"불가피한",           pos:"형용사",ex:"Chores are inevitable.",                                                          src:"03 필자의 주장"},
+  {en:"obligatory",      ko:"의무적인",           pos:"형용사",ex:"Rather than viewing chores as purely obligatory activities...",                   src:"03 필자의 주장"},
+  {en:"seize",           ko:"잡다; 포착하다",     pos:"동사",  ex:"Why not seize these moments as opportunities?",                                  src:"03 필자의 주장"},
+  {en:"incorporate",     ko:"포함시키다",         pos:"동사",  ex:"Incorporating quick exercises into your daily chores...",                         src:"03 필자의 주장"},
+  {en:"automatically",   ko:"자동적으로",         pos:"부사",  ex:"We naturally and automatically break it up into shapes.",                         src:"04 함축 의미"},
+  {en:"recode",          ko:"재부호화하다",       pos:"동사",  ex:"We recode what we see through the lens of everything we know.",                   src:"04 함축 의미"},
+  {en:"reconstruct",     ko:"재구성하다",         pos:"동사",  ex:"We reconstruct memories rather than retrieving the video.",                       src:"04 함축 의미"},
+  {en:"retrieve",        ko:"상기하다; 회수하다", pos:"동사",  ex:"We reconstruct memories rather than retrieving them.",                            src:"04 함축 의미"},
+  {en:"efficient",       ko:"효율적인",           pos:"형용사",ex:"It's a more efficient way to store information.",                                 src:"04 함축 의미"},
+  {en:"compression",     ko:"압축",               pos:"명사",  ex:"An optimal image compression algorithm such as JPG...",                           src:"04 함축 의미"},
+  {en:"generalize",      ko:"일반화하다",         pos:"동사",  ex:"People struggle to generalize, learn, and make connections.",                     src:"04 함축 의미"},
+  {en:"assumption",      ko:"가정; 추정",         pos:"명사",  ex:"We see the world through our assumptions and motivations.",                       src:"04 함축 의미"},
+  {en:"undermine",       ko:"손상시키다; 약화시키다",pos:"동사",ex:"This completely undermined the legal primacy of eyewitness testimony.",           src:"04 함축 의미"},
+  {en:"primacy",         ko:"우위성; 최고 권위",  pos:"명사",  ex:"It undermined the legal primacy of eyewitness testimony.",                        src:"04 함축 의미"},
+  {en:"eyewitness",      ko:"목격자",             pos:"명사",  ex:"The discovery undermined eyewitness testimony.",                                  src:"04 함축 의미"},
+  {en:"testimony",       ko:"증언",               pos:"명사",  ex:"It undermined the legal primacy of eyewitness testimony.",                        src:"04 함축 의미"},
+  {en:"abstract",        ko:"추상적인",           pos:"형용사",ex:"Our memories are reconstructed through abstract representations.",                src:"04 함축 의미"},
+  {en:"deliberation",    ko:"숙고; 신중한 고려",  pos:"명사",  ex:"A careful deliberation of facial features can be inaccurate.",                   src:"05 글의 요지"},
+  {en:"inaccurate",      ko:"부정확한",           pos:"형용사",ex:"It can actually be a sign of an inaccurate identification.",                      src:"05 글의 요지"},
+  {en:"identification",  ko:"식별; 확인",         pos:"명사",  ex:"It can be a sign of an inaccurate identification.",                              src:"05 글의 요지"},
+  {en:"interpretation",  ko:"해석; 이해",         pos:"명사",  ex:"It is the truest interpretation of what our mind is telling us.",                 src:"05 글의 요지"},
+  {en:"impression",      ko:"인상; 첫인상",       pos:"명사",  ex:"That very first impression can be more accurate.",                                src:"05 글의 요지"},
+  {en:"deliberative",    ko:"신중한; 숙고하는",   pos:"형용사",ex:"More accurate than the deliberative, reasoned self-narrative.",                   src:"05 글의 요지"},
+  {en:"unconscious",     ko:"무의식적인",         pos:"형용사",ex:"The superior performance of relatively unconscious first guesses...",              src:"05 글의 요지"},
+  {en:"justification",   ko:"정당화",             pos:"명사",  ex:"Logical step-by-step justifications for a decision.",                            src:"05 글의 요지"},
+  {en:"quantitative",    ko:"정량적인",           pos:"형용사",ex:"Many forms of research lead naturally to quantitative data.",                     src:"06 글의 주제"},
+  {en:"reliable",        ko:"신뢰할 수 있는",     pos:"형용사",ex:"It might not be reliable.",                                                       src:"06 글의 주제"},
+  {en:"respondent",      ko:"응답자",             pos:"명사",  ex:"Respondents' recollections may be inaccurate.",                                  src:"06 글의 주제"},
+  {en:"recollection",    ko:"회상; 기억",         pos:"명사",  ex:"Respondents' recollections may be inaccurate.",                                  src:"06 글의 주제"},
+  {en:"concrete",        ko:"구체적인",           pos:"형용사",ex:"This prompts a concrete answer.",                                                 src:"06 글의 주제"},
+  {en:"consistency",     ko:"일관성",             pos:"명사",  ex:"Ensure consistency from one study to the next.",                                 src:"06 글의 주제"},
+  {en:"procrastinator",  ko:"미루는 사람",        pos:"명사",  ex:"Instead of asking people to rate how bad a procrastinator they are...",           src:"06 글의 주제"},
+  {en:"singularity",     ko:"특이점",             pos:"명사",  ex:"The evolution of AI is associated with singularity.",                             src:"07 글의 제목"},
+  {en:"consciousness",   ko:"의식; 의식 상태",    pos:"명사",  ex:"AI and human consciousness will then begin to evolve together.",                 src:"07 글의 제목"},
+  {en:"intellectual",    ko:"지적인",             pos:"형용사",ex:"AI will provide us with intellectual stimulation.",                               src:"07 글의 제목"},
+  {en:"stimulation",     ko:"자극",               pos:"명사",  ex:"AI will provide us with intellectual stimulation.",                               src:"07 글의 제목"},
+  {en:"creativity",      ko:"창의성",             pos:"명사",  ex:"It will inspire new insights and creativity.",                                   src:"07 글의 제목"},
+  {en:"ethics",          ko:"윤리",               pos:"명사",  ex:"What values and ethics we incorporate into AI.",                                  src:"07 글의 제목"},
+  {en:"coexistence",     ko:"공존",               pos:"명사",  ex:"A mutual coexistence of conscious beings.",                                      src:"07 글의 제목"},
+  {en:"portrait",        ko:"인물 사진",          pos:"명사",  ex:"Known for his highly artistic portraits of Hollywood celebrities.",               src:"09 내용 일치"},
+  {en:"celebrity",       ko:"유명 인사",          pos:"명사",  ex:"His artistic portraits of Hollywood celebrities.",                                src:"09 내용 일치"},
+  {en:"eagerly",         ko:"간절히; 열심히",     pos:"부사",  ex:"He eagerly awaited the weekly arrival of Life magazine.",                        src:"09 내용 일치"},
+  {en:"prospect",        ko:"전망; 가능성",       pos:"명사",  ex:"He believed he would have better career prospects.",                             src:"09 내용 일치"},
+  {en:"iconic",          ko:"상징적인",           pos:"형용사",ex:"His photos became iconic almost instantly.",                                      src:"09 내용 일치"},
+  {en:"exotic",          ko:"이국적인",           pos:"형용사",ex:"He spent his weekends in exotic locations.",                                      src:"09 내용 일치"}
+];
+
+const SOURCES = ['전체', ...new Set(ALL.map(v => v.src))];
+let activeFilter = '전체';
+let deck = [], si = 0, flipped = false;
+let qDeck = [], qi = 0, qs = 0, qa = false, qMode = 'en';
+
+// 필터 버튼 생성
+const filterRow = document.getElementById('filter-row');
+SOURCES.forEach(src => {
+  const btn = document.createElement('button');
+  btn.id = 'hf-' + src;
+  btn.className = 'filter-btn' + (src === '전체' ? ' on' : '');
+  btn.textContent = src;
+  btn.onclick = () => setFilter(src);
+  filterRow.appendChild(btn);
+});
+
+function sh(arr) {
+  const a=[...arr];
+  for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}
+  return a;
+}
+function getPool() {
+  return activeFilter==='전체' ? [...ALL] : ALL.filter(v=>v.src===activeFilter);
+}
+function show(id) {
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById('s-'+id).classList.add('active');
+  window.scrollTo(0,0);
+}
+function setFilter(f) {
+  activeFilter=f;
+  document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('on'));
+  document.getElementById('hf-'+f).classList.add('on');
+}
+function goHome() { show('home'); }
+
+function goStudy() {
+  deck=getPool(); si=0; flipped=false; renderCard(); show('study');
+}
+function renderCard() {
+  const v=deck[si];
+  document.getElementById('cw').textContent=v.en;
+  document.getElementById('cm').textContent=v.ko;
+  document.getElementById('ce').textContent=v.ex;
+  document.getElementById('csrc').textContent=v.src;
+  document.getElementById('cpos').textContent=v.pos;
+  document.getElementById('ci').classList.remove('flipped');
+  flipped=false;
+  const n=deck.length;
+  document.getElementById('cnum').textContent=(si+1)+' / '+n;
+  document.getElementById('sc').textContent=(si+1)+' / '+n;
+  document.getElementById('sp').style.width=((si+1)/n*100)+'%';
+  document.getElementById('bp').disabled=si===0;
+  document.getElementById('bn').disabled=si===n-1;
+}
+function flip(){flipped=!flipped;document.getElementById('ci').classList.toggle('flipped',flipped);}
+function prev(){if(si>0){si--;renderCard();}}
+function next(){if(si<deck.length-1){si++;renderCard();}}
+function shuffleDeck(){deck=sh(deck);si=0;renderCard();}
+function resetDeck(){deck=getPool();si=0;renderCard();}
+
+function setQMode(m){
+  qMode=m;
+  document.getElementById('qt-en').classList.toggle('on',m==='en');
+  document.getElementById('qt-ko').classList.toggle('on',m==='ko');
+  qi=0;qs=0;qa=false;qDeck=sh(getPool());renderQ();
+}
+function goQuiz(){qDeck=sh(getPool());qi=0;qs=0;qa=false;renderQ();show('quiz');}
+function renderQ(){
+  if(qi>=qDeck.length){showResults();return;}
+  qa=false;
+  const v=qDeck[qi];
+  const isEn=qMode==='en';
+  document.getElementById('qlabel').textContent=isEn?'이 단어의 뜻은?':'이 뜻에 해당하는 단어는?';
+  document.getElementById('qq').textContent=isEn?v.en:v.ko;
+  document.getElementById('qc').textContent=(qi+1)+' / '+qDeck.length;
+  document.getElementById('qp').style.width=(qi/qDeck.length*100)+'%';
+  const pool=getPool().filter(x=>isEn?x.ko!==v.ko:x.en!==v.en);
+  const wrong=sh(pool).slice(0,3);
+  const opts=sh([v,...wrong]);
+  const container=document.getElementById('qo');
+  container.innerHTML='';
+  opts.forEach(o=>{
+    const btn=document.createElement('button');
+    btn.className='opt';
+    btn.textContent=isEn?o.ko:o.en;
+    const correct=isEn?o.ko===v.ko:o.en===v.en;
+    const cv=isEn?v.ko:v.en;
+    btn.onclick=()=>answer(btn,correct,cv);
+    container.appendChild(btn);
+  });
+}
+function answer(btn,correct,cv){
+  if(qa)return;qa=true;
+  if(correct){btn.classList.add('correct');qs++;}
+  else{
+    btn.classList.add('wrong');
+    document.querySelectorAll('.opt').forEach(b=>{if(b.textContent===cv)b.classList.add('correct');});
+  }
+  document.querySelectorAll('.opt').forEach(b=>b.disabled=true);
+  setTimeout(()=>{qi++;renderQ();},1300);
+}
+function showResults(){
+  const total=qDeck.length,pct=Math.round(qs/total*100);
+  document.getElementById('rscore').textContent=qs;
+  document.getElementById('rtotal').textContent='/ '+total;
+  document.getElementById('rpct').textContent='정답률 '+pct+'%';
+  let msg;
+  if(pct>=90)msg='완벽해요! 🎉 모든 단어를 잘 알고 있어요.';
+  else if(pct>=70)msg='잘했어요! 💪 조금 더 연습하면 완벽해요.';
+  else if(pct>=50)msg='절반 이상 맞았어요. 틀린 단어를 복습해 보세요.';
+  else msg='카드 학습으로 더 연습한 뒤 다시 도전해 보세요!';
+  document.getElementById('rmsg').textContent=msg;
+  show('results');
+}
+document.addEventListener('keydown',e=>{
+  if(!document.getElementById('s-study').classList.contains('active'))return;
+  if(e.key===' '||e.key==='Enter'){e.preventDefault();flip();}
+  if(e.key==='ArrowLeft')prev();
+  if(e.key==='ArrowRight')next();
+});
+</script>
+</body>
+</html>
